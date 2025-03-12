@@ -26,7 +26,3 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
-
-# Dependencies lock files
-package-lock.json
-yarn.lock
