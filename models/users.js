@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 
 const UserSchema = new mongoose.Schema({
@@ -28,18 +29,6 @@ const UserSchema = new mongoose.Schema({
         required: true,
         minlength: 8,
         select: false
-    },
-
-    passwordConfirm: {
-        type: String,
-        required: [true, 'Please confirm your password'],
-        
-        validate: {     //custom validator
-            validator: function(el){
-                return el === this.password;
-            },
-            message: "Password must be the same"
-        },
     },
 
     preferences: {
@@ -94,5 +83,16 @@ const UserSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
+UserSchema.pre('save', async function(next){        
+    if(!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 12);
+    this.passwordConfirm = undefined;   
+});
+
+UserSchema.methods.checkPassword = function(givenPassword, storedPassword){
+    return bcrypt.compare(givenPassword, storedPassword);
+}
+
 const User = mongoose.model('User', UserSchema);
+
 module.exports = User;
