@@ -32,7 +32,8 @@ const UserSchema = new mongoose.Schema({
     },
 
     preferences: {
-        categories: [{type:String}]
+        categories: [String],  
+        tags: [String],       
     },
 
     wishlist: [{
@@ -50,14 +51,14 @@ const UserSchema = new mongoose.Schema({
         ref: 'Product'
     }],
 
-    notifications: [
-        {
-          title: String,
-          message: String,
-          isRead: { type: Boolean, default: false },
-          timestamp: { type: Date, default: Date.now },
-        },
-    ],
+    // notifications: [
+    //     {
+    //       title: String,
+    //       message: String,
+    //       isRead: { type: Boolean, default: false },
+    //       timestamp: { type: Date, default: Date.now },
+    //     },
+    // ],
 
     referralCode: {
         type: String,
@@ -73,15 +74,42 @@ const UserSchema = new mongoose.Schema({
         ref: 'User', 
         default: null,
     },
+
+    identification: { type: String, required: function () { return this.role === "seller"; } },
   
     role: {
         type: String,
-        enum: ['user', 'seller'],
+        enum: ['user', 'seller', 'admin'],
         default: 'user'
-    }
+    },
+
+    recommendations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], 
 },
     { timestamps: true }
 );
+
+//mock data
+const { faker } = require("@faker-js/faker");
+
+const categories = ["Shoes", "Pc", "Mobile", "Clothes", "Groceries", "Electronics", "Furniture", "Beauty", "Toys", "Books"];
+const tags = ["Nike", "Air Force", "Jordan", "Adidas", "Puma", "HP", "Dell", "MacBook", "Asus", "Lenovo", "iPhone", "Samsung", "Tecno", "Huawei", "OnePlus", "T-Shirt", "Jeans", "Jacket", "Sweater", "Dress", "Organic", "Fresh", "Discount", "Imported", "Local", "Reebok", "Converse", "New Balance", "Vans", "Acer", "MSI", "Razer", "Microsoft", "Xiaomi", "Oppo", "Google Pixel", "Sony", "Skirt", "Shirt", "Shorts", "Suit", "Blouse", "Frozen", "Canned", "Vegan", "Gluten-Free", "Dairy", "Headphones", "Speakers", "TV", "Camera", "Smartwatch", "Laptop", "Smartphone", "Tablet", "Projector", "Sofa", "Bed", "Chair", "Table", "Desk", "Bookshelf", "Wardrobe", "Dresser", "Couch", "Coffee Table", "Skincare", "Makeup", "Haircare", "Fragrance", "Nail Care", "Bath & Body", "Shampoo", "Conditioner", "Perfume", "Action Figures", "Dolls", "Board Games", "Puzzles", "Building Blocks", "Stuffed Animals", "Remote Control Cars", "Video Games", "Fiction", "Non-Fiction", "Mystery", "Biography", "Children's Books", "Self-Help", "History", "Cookbooks"];
+
+
+
+function createRandomUser() {
+    const now = new Date(); 
+
+    return {
+        name: faker.internet.username(),
+        email: faker.internet.email(),
+        phoneNumber: faker.phone.number("+2519########"),
+        password: faker.internet.password(),
+        shopName: faker.company.name(),
+        createdAt: now,
+    };
+}
+
+const fakeUser = Array.from({ length: 1 }, createRandomUser);
 
 UserSchema.pre('save', async function(next){        
     if(!this.isModified('password')) return next();
@@ -94,5 +122,12 @@ UserSchema.methods.checkPassword = function(givenPassword, storedPassword){
 }
 
 const User = mongoose.model('User', UserSchema);
+
+const seedUsers = async () => {
+    await User.insertMany(fakeUser); 
+    console.log("Mock users added!"); 
+};
+  
+seedUsers();
 
 module.exports = User;
