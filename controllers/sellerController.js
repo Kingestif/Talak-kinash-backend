@@ -1,4 +1,6 @@
 const user = require('../models/users');
+const Product = require('../models/product');  
+
 
 exports.postProduct = async(req, res) => {
     try{
