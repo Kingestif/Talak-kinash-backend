@@ -31,6 +31,17 @@ const UserSchema = new mongoose.Schema({
         select: false
     },
 
+    gender: {
+        type: String,
+        enum: ["male", "female"],
+        default: null
+    },
+
+    birthday: {
+        type: Date,
+        default: null
+    },
+
     preferences: {
         categories: [String],  
         tags: [String],       
@@ -51,21 +62,12 @@ const UserSchema = new mongoose.Schema({
         ref: 'Product'
     }],
 
-    // notifications: [
-    //     {
-    //       title: String,
-    //       message: String,
-    //       isRead: { type: Boolean, default: false },
-    //       timestamp: { type: Date, default: Date.now },
-    //     },
-    // ],
-
     referralCode: {
         type: String,
         unique: true,
         required: true,
         default: function() {
-            return crypto.randomBytes(6).toString('hex');  
+            return crypto.randomBytes(3).toString('hex').toUpperCase(); 
         }
     },
 
@@ -76,6 +78,25 @@ const UserSchema = new mongoose.Schema({
     },
 
     identification: { type: String, required: function () { return this.role === "seller"; } },
+
+    chapaApi: {
+        type: String,
+        // unique: true
+    },
+
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    sellerVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    verificationToken: {
+        type: String
+    },
   
     role: {
         type: String,
@@ -128,6 +149,6 @@ const seedUsers = async () => {
     console.log("Mock users added!"); 
 };
   
-seedUsers();
+// seedUsers();
 
 module.exports = User;

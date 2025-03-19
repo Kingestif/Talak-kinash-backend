@@ -1,6 +1,6 @@
 const User = require('../models/users');
 
-exports.viewAdminProfile = (req, res) => {
+exports.viewAdminProfile = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -14,7 +14,7 @@ exports.viewAdminProfile = (req, res) => {
     }
 }
 
-exports.viewUserProfile = (req, res) => {
+exports.viewUserProfile = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -29,7 +29,7 @@ exports.viewUserProfile = (req, res) => {
     }
 }
 
-exports.viewAllUsers = (req, res) => {
+exports.viewAllUsers = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -44,7 +44,7 @@ exports.viewAllUsers = (req, res) => {
     }
 }
 
-exports.viewAllSellers = (req, res) => {
+exports.viewAllSellers = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -60,7 +60,7 @@ exports.viewAllSellers = (req, res) => {
 }
 
 
-exports.viewPendingProducts = (req, res) => {
+exports.viewPendingProducts = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -75,7 +75,7 @@ exports.viewPendingProducts = (req, res) => {
     }
 }
 
-exports.viewAllProducts = (req, res) => {
+exports.viewAllProducts = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -90,7 +90,7 @@ exports.viewAllProducts = (req, res) => {
     }
 }
 
-exports.updateProductStatus = (req, res) => {
+exports.updateProductStatus = async(req, res) => {
     try{
         res.status(200).json({
             status: "success",
@@ -102,5 +102,50 @@ exports.updateProductStatus = (req, res) => {
             status: "error",
             message: "Failed to update the product"
         });
+    }
+}
+
+exports.pendingSellers = async(req, res) => {
+    try{
+        const pendingSeller = await User.find({role: 'seller', sellerVerified: false});
+        res.status(200).json({
+            status: "success",
+            message: "Pending sellers fetched successfully",
+            data: {
+                user: pendingSeller
+            } 
+        });
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            message: "Failed to fetch pending sellers"
+        });
+        
+    }
+}
+
+exports.approveSeller = async(req, res) => {
+    try{
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { sellerVerified: true },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Seller not found" });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully approved the seller",
+            user: updatedUser,
+        });
+
+    }catch(error){
+        res.status(400).json({
+            status: "error",
+            message: "Failed to approve the seller"
+        })
     }
 }

@@ -166,3 +166,9 @@ const getRecommendations = async (userId) => {
     const user = await User.findById(userId).populate('recommendations');
     return user.recommendations;
 };
+
+
+exports.verifyEmail = async (req, res) => {
+    
+
+}
