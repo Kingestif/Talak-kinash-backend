@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/api/index.js",
-    "build": "tsc"
+    "start": "nodemon server.js"
   },
   "author": "estifanos zinabu",
   "license": "ISC",
@@ -25,8 +24,6 @@
     "validator": "^13.12.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.6.0",
-    "typescript": "^5.8.2",
-    "ts-node": "^10.9.2"
+    "@faker-js/faker": "^9.6.0"
   }
 }
