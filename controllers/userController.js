@@ -1,16 +1,31 @@
-const user = require('../models/users');
+const User = require('../models/users');
 const Product = require('../models/product'); 
 
 
 exports.getUserProfile = async(req, res) => {
+    
     try{
-        res.status(200).json({
+        const user = {
+            id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+            phoneNumber: req.user.phoneNumber,
+            gender: req.user.gender,
+            birthday: req.user.birthday.toISOString().split('T')[0],
+            referralCode: req.user.referralCode,
+            role: req.user.role
+        }
+
+        return res.status(200).json({
             status: "success",
-            message: "User information fetched successfully"
+            message: "User information fetched successfully",
+            data: {
+                user: user,
+            }
         });
 
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Failed to fetch user info"
         });
@@ -21,14 +36,23 @@ exports.getUserProfile = async(req, res) => {
 
 exports.updateUserProfile = async(req, res) => {
     try{
-        res.status(200).json({
+        const {role, ...updateData} = req.body
+        const user = await User.findByIdAndUpdate(req.user._id, updateData, {
+            new: true,
+            runValidators: true
+        });
+
+        return res.status(200).json({
             status: "success",
             message: "User Information Updated Successfully",
+            data: {
+                user: user
+            }
         });
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
-            message: "Failed to update user info"
+            message: "Failed to update user info",
         });
     }
 }
@@ -78,97 +102,76 @@ exports.getNotification = async(req, res) =>{
 
 exports.addToWishlist = async(req, res) => {
     try{
-        res.status(200).json({
+        const userId = req.user._id;
+        const productId = req.params.id;
+
+        const product = await Product.findById(productId);
+        if(!product){
+            return res.status(404).json({
+                status: "erorr",
+                message: "Product not found"
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(userId,
+            {$addToSet: {wishlist: productId}},
+            {new: true}
+        );
+
+        return res.status(200).json({
             status: "success",
             message: "Product added to wishlist"
         });
+
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
-            message: "Error adding product to wishlist"
+            message: "Error adding product to wishlist",
+            error: error.message
         });
     }
 }
 
-exports.getFromWishlist = (req, res) => {
+exports.getFromWishlist = async(req, res) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId).populate('wishlist');
+
     try{
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
-            message: "Successfully fetched from wishlist"
+            message: "Successfully fetched from wishlist",
+            data: {
+                wishlist: user.wishlist
+            }
         });
 
     }catch(error){
-        res.status().json({
+        return res.status().json({
             status: "error",
             message: "Failed to fetch from wishlist"
         });
     }
 }
 
-exports.removeFromWishlist = (req, res) => {
+exports.removeFromWishlist = async(req, res) => {
     try{
-        res.status(204).json({
+        const userId = req.user._id;
+        const productId = req.params.productId;
+        const user = await User.findByIdAndUpdate(userId, 
+            {$pull: {wishlist: productId}},
+            {new: true}
+        );
+
+        return res.status(204).json({
             status: "success",
-            message: "Product removed from wishlist"
+            message: "Product removed from wishlist",
+            wishlist: user.wishlist
         });
+
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Error removing product from wishlist"
         });
     }
-}
-
-
-
-const calculateRecommendations = async (userId) => {
-    // const user = await User.findById(userId).populate('wishlist').populate('cart');  ill put it on wishlist and cart endpoint
-
-    // Get all products from the categories and tags the user is interested in
-    const interestedProducts = await Product.find({
-        category: { $in: user.preferences.categories },
-        tag: { $in: user.preferences.tags }
-    }).limit(10); 
-
-    // Update the user's recommendations for future use
-    user.recommendations = interestedProducts.map(product => product._id);
-    await user.save();
-
-    return interestedProducts;
-};
-
-
-const addToWishlist = async (userId, productId) => {
-    const user = await User.findById(userId);
-
-    // Add product to wishlist
-    user.wishlist.push(productId);
-
-    // Optionally, update preferences based on the product (you could use tags/categories here)
-    const product = await Product.findById(productId);
-    if (!user.preferences.categories.includes(product.category)) {
-        user.preferences.categories.push(product.category);
-    }
-    product.tag.forEach(tag => {
-        if (!user.preferences.tags.includes(tag)) {
-            user.preferences.tags.push(tag);
-        }
-    });
-
-    // Recalculate recommendations
-    await calculateRecommendations(userId);
-
-    await user.save();
-};
-
-//server the recommendations 
-const getRecommendations = async (userId) => {
-    const user = await User.findById(userId).populate('recommendations');
-    return user.recommendations;
-};
-
-
-exports.verifyEmail = async (req, res) => {
-    
-
 }

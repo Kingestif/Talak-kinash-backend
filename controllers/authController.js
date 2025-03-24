@@ -3,6 +3,7 @@ const {promisify} = require('util');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const bcrypt = require('bcrypt');
 
 
 exports.signup = async(req,res,next)=>{
@@ -31,13 +32,15 @@ exports.signup = async(req,res,next)=>{
 
         
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        newuser.verificationToken = verificationToken;
+        const hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+        newuser.verificationToken = hashedToken;
+        
         await newuser.save();
 
         newuser.password = undefined;
         
         const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
-        const verificationUrl = `${baseUrl}/api/v1/auth/verifyEmail/${verificationToken}`;
+        const verificationUrl = `${baseUrl}/api/v1/auth/verify/${verificationToken}`;
 
         // Send email
         await sendEmail({
@@ -52,6 +55,13 @@ exports.signup = async(req,res,next)=>{
         });
 
     }catch(error){
+        if (error.code === 11000) {
+            return res.status(400).json({
+                status: "error",
+                message: `User with ${Object.keys(error.keyPattern)[0]} already exists`
+            });
+        }
+
         res.status(500).json({
             status: 'error',
             message: error.message
@@ -98,7 +108,8 @@ exports.login = async(req,res,next) =>{
 
 exports.verifyEmail = async (req, res) => {
     try {
-        const user = await User.findOne({ verificationToken: req.params.token });
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const user = await User.findOne({ verificationToken: hashedToken });
 
         if (!user) {
             return res.status(400).json({ status: 'error', message: 'Invalid or expired token' });
@@ -114,7 +125,7 @@ exports.verifyEmail = async (req, res) => {
 
         res.status(200).json({
             status: "success",
-            message: "Email verified successfully",
+            message: "Email verified successfully", 
             token: token,
         });
 

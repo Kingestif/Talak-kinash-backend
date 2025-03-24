@@ -1,4 +1,4 @@
-const user = require('../models/users');
+const User = require('../models/users');
 const Product = require('../models/product');  
 
 
