@@ -15,6 +15,7 @@ app.use((req,res,next)=>{
     next();
 });
 
+
 app.use(express.json()); 
 
 app.use('/api/v1/users', userRouter);
@@ -22,5 +23,9 @@ app.use('/api/v1/sellers', sellerRouter);
 app.use('/api/v1/chapa', chapaRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/admin', adminRouter);
+
+app.get("/", (req, res) => {
+    res.send(" Service  Is  Running");
+});
 
 module.exports = app;
