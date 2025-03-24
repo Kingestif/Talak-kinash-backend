@@ -81,7 +81,6 @@ const UserSchema = new mongoose.Schema({
 
     chapaApi: {
         type: String,
-        // unique: true
     },
 
     emailVerified: {
@@ -97,7 +96,7 @@ const UserSchema = new mongoose.Schema({
     verificationToken: {
         type: String
     },
-  
+
     role: {
         type: String,
         enum: ['user', 'seller', 'admin'],

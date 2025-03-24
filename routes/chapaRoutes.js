@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const {initializePayment, verifyPayment} = require('../controllers/chapaController');
+const {initializePayment, paymentVerification} = require('../controllers/chapaController');
+const {protect, verify, isSeller} = require('../controllers/authController');
 
-router.route('/initialize').post(initializePayment);
-router.route('/verify/:tx_ref').get(verifyPayment);
+
+router.route('/initialize').post(protect, verify, isSeller, initializePayment);
+router.route('/verify').post(paymentVerification);
 
 module.exports = router;

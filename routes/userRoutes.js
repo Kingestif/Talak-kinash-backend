@@ -5,11 +5,12 @@ const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotific
 const {protect, verify, isUser} = require('../controllers/authController');
 
 
-router.route('/profile').get(protect, verify, isUser, getUserProfile).patch(updateUserProfile);
+router.route('/profile').get(protect, verify, isUser, getUserProfile).patch(protect, verify, isUser, updateUserProfile);
 router.route('/search').get(searchProduct).post(scanBarcode);
 router.route('/notifications').get(getNotification);
-router.route('/wishlist').get(getFromWishlist).post(addToWishlist);
-router.route('/wishlist/:productId').delete(removeFromWishlist);
+router.route('/wishlist').get(protect, verify, isUser, getFromWishlist);
+router.route('/wishlist/:id').post(protect, verify, isUser, addToWishlist);
+router.route('/wishlist/:productId').delete(protect, verify, isUser, removeFromWishlist);
 
 module.exports =  router;
     
