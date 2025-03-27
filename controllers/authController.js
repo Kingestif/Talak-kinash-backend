@@ -7,17 +7,18 @@ const bcrypt = require('bcrypt');
 
 
 exports.signup = async(req,res,next)=>{
-    let referringUserId = null;
-
-    if (req.body.referredBy) {
-        const referringUser = await User.findOne({ referralCode: req.body.referredBy });
-        if (!referringUser) {
-            return res.status(400).json({ message: "Invalid referral code" });
-        }
-        referringUserId = referringUser._id; 
-    }
-
+    
     try{
+        let referringUserId = null;
+    
+        if (req.body.referredBy) {
+            const referringUser = await User.findOne({ referralCode: req.body.referredBy });
+            if (!referringUser) {
+                return res.status(400).json({ message: "Invalid referral code" });
+            }
+            referringUserId = referringUser._id; 
+        }
+        
         const newuser = await User.create({
             name: req.body.name,
             email: req.body.email,

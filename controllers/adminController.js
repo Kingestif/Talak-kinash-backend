@@ -1,31 +1,44 @@
 const User = require('../models/users');
 const SubscriptionPlan = require('../models/subscriptionSchema');
+const jwt = require('jsonwebtoken');
+const Product = require('../models/product');
 
 
 exports.viewAdminProfile = async(req, res) => {
+    
     try{
-        res.status(200).json({
+        const token = req.headers.authorization.split(' ')[1];
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        const userid = verified.id;
+        const user = await User.findById(userid);
+
+        return res.status(200).json({
             status: "success",
-            message: "Admin profile fetched successfully"
+            message: "Admin profile fetched successfully",
+            data: user
         });
+
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
-            message: error.message
+            message: "Failed to fetch user profile"
         }); 
     }
 }
 
 exports.viewUserProfile = async(req, res) => {
     try{
-        res.status(200).json({
+        const user = await User.findById(req.params.id);
+
+        return res.status(200).json({
             status: "success",
-            message: "Users profile fetched successfully"
+            message: "Users profile fetched successfully",
+            data: user
         });
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
-            message: error.message
+            message: "Failed to fetch the user"
         });
         
     }
@@ -33,13 +46,16 @@ exports.viewUserProfile = async(req, res) => {
 
 exports.viewAllUsers = async(req, res) => {
     try{
-        res.status(200).json({
+        const users = await User.find();
+
+        return res.status(200).json({
             status: "success",
-            message: "Successfully fetched all users"
+            message: "Successfully fetched all users",
+            data: users
         });
 
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Failed to fetch all users"
         });
@@ -48,61 +64,35 @@ exports.viewAllUsers = async(req, res) => {
 
 exports.viewAllSellers = async(req, res) => {
     try{
-        res.status(200).json({
+        const seller = await User.findOne({role: "seller"});
+        return res.status(200).json({
             status: "success",
-            message: "Successfully fetched all sellers"
+            message: "Successfully fetched all sellers",
+            data: seller
         });
 
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Failed to fetch all sellers"
         });
     }
 }
 
-
-exports.viewPendingProducts = async(req, res) => {
-    try{
-        res.status(200).json({
-            status: "success",
-            message: "Successfully fetched all pending products"
-        });
-
-    }catch(error){
-        res.status(400).json({
-            status: "error",
-            message: "Failed to fetched pending products"
-        });
-    }
-}
-
 exports.viewAllProducts = async(req, res) => {
     try{
+        const products = await Product.find();
+
         res.status(200).json({
             status: "success",
-            message: "Successfully fetched all products"
+            message: "Successfully fetched all products",
+            data: products
         });
 
     }catch(error){
         res.status(400).json({
             status: "error",
             message: "Failed to fetched all products"
-        });
-    }
-}
-
-exports.updateProductStatus = async(req, res) => {
-    try{
-        res.status(200).json({
-            status: "success",
-            message: "Successfully updated the product"
-        });
-
-    }catch(error){
-        res.status(400).json({
-            status: "error",
-            message: "Failed to update the product"
         });
     }
 }
