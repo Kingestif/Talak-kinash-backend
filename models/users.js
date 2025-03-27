@@ -52,10 +52,11 @@ const UserSchema = new mongoose.Schema({
         ref: 'Product',  
     }],
 
-    shopName: {
-        type: String,
-        default: null 
-    },
+    shopName: { type: String, required: function () { return this.role === "seller"; }},
+
+    storeLocation: { type: String, required: function () { return this.role === "seller"; }},
+
+    storeLink: { type: String, required: function () { return this.role === "seller"; },},
 
     productsPosted: [{
         type: mongoose.Schema.Types.ObjectId,

@@ -4,33 +4,29 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 
 exports.signup = async(req,res,next)=>{
     
     try{
+        const {name, email, phoneNumber, password, role, gender, birthday, identification, referredBy, shopName, storeLocation, storeLink} = req.body;
+        
+        if (!validator.isURL(storeLink, { require_protocol: true })) {
+            return res.status(400).json({ message: "Invalid URL format. Please provide a valid URL with http or https." });
+        }
+        
         let referringUserId = null;
-    
-        if (req.body.referredBy) {
+        if (referredBy) {
             const referringUser = await User.findOne({ referralCode: req.body.referredBy });
             if (!referringUser) {
                 return res.status(400).json({ message: "Invalid referral code" });
             }
             referringUserId = referringUser._id; 
         }
-        
-        const newuser = await User.create({
-            name: req.body.name,
-            email: req.body.email,
-            phoneNumber: req.body.phoneNumber,
-            password: req.body.password,
-            role: req.body.role,
-            gender: req.body.gender,
-            birthday:  new Date(req.body.birthday),
-            identification: req.body.identification,
-            referredBy: referringUserId
-        });
 
+        const formattedBirthday = new Date(birthday);
+        const newuser = await User.create({name, email, phoneNumber, password, role, gender, birthday: formattedBirthday, identification, referredBy: referringUserId, shopName, storeLocation, storeLink});
         
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
