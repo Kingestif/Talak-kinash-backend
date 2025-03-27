@@ -1,4 +1,6 @@
 const User = require('../models/users');
+const SubscriptionPlan = require('../models/subscriptionSchema');
+
 
 exports.viewAdminProfile = async(req, res) => {
     try{
@@ -147,5 +149,27 @@ exports.approveSeller = async(req, res) => {
             status: "error",
             message: "Failed to approve the seller"
         })
+    }
+}
+
+exports.updateSubscriptionPrice = async(req, res) => {
+    try{
+        const data = req.body;
+        const plan = await SubscriptionPlan.findOneAndUpdate(
+            {type: data.type}, 
+            {$set: {price: data.price}},
+            {new: true}
+        );
+        res.status(200).json({
+            status: "success",
+            message: "Subscription plan updated successfuly",
+            data: plan
+        });
+    }catch(error){
+        console.log(error.message);
+        res.status(400).json({
+            status: "error",
+            message: "failed to update subscription plan"
+        });
     }
 }

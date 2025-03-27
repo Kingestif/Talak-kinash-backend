@@ -95,6 +95,6 @@ const seedProduct = async () => {
     console.log("Mock products added!"); 
 };
   
-seedProduct();
+// seedProduct();
 
 module.exports = Product;

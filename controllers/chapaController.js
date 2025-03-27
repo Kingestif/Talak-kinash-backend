@@ -3,33 +3,30 @@ const Chapa = require("chapa");
 const crypto = require('crypto');
 const User = require('../models/users');
 const SellerPayment = require('../models/sellerPayment');
+const SubscriptionPlan = require('../models/subscriptionSchema');
 
 const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);  
 
 exports.initializePayment = async (req, res) => {
     try {
       const seller = req.user;
-      console.log("here is the seller",seller);
+      const previousPayment = await SellerPayment.findOne({sellerId: seller._id});
 
-      const { amount, currency, email, first_name, last_name, subscriptionType } = req.body;
+      if (previousPayment.status === "success"){
+        return res.status(400).json({message: "You already have an active subscription. Please wait until it expires before starting a new one."});
+      }
+
+      const { currency, first_name, last_name, subscriptionType } = req.body;
   
-      if (!amount || !currency || !email || !first_name || !last_name || !subscriptionType) {
+      if (!currency || !first_name || !last_name || !subscriptionType) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
-      const subscriptionPrices = {
-        monthly: 1000,
-        quarterly: 2500,
-        yearly: 5000
-      }
+      const subscription = await SubscriptionPlan.findOne({type: subscriptionType});
+      amount = subscription.price;
 
-      if (amount != subscriptionPrices[subscriptionType]) {
-        return res.status(400).json({
-          status: "error",
-          message: `Invalid amount for ${subscriptionType} subscription expected ${subscriptionPrices[subscriptionType]} birr`
-        });
-      }
-  
+      console.log("updated Amount", amount);
+
       const customerInfo = {
         amount,
         currency,
