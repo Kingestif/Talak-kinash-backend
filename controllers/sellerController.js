@@ -3,16 +3,17 @@ const Product = require('../models/product');
 
 exports.postProduct = async(req, res) => {
     try{
-        data = req.body;
-        const newProduct = await Product.create({
-            name: data.name,
-            description: data.description,
-            price: data.price,
-            category: data.category,
-            tag: data.tag,
-            images: data.images,
-            seller: data.seller
-        });
+        const {name, description, price, category, tag} = req.body;
+
+        // ---product image
+        let images = [];
+        
+        if (req.files) {
+            images = req.files.map(file => file.path);
+        }
+        const seller = req.user._id;
+
+        const newProduct = await Product.create({name, description, price, category, tag, images, seller});
 
         await User.findByIdAndUpdate(newProduct.seller, {
             $push: {productsPosted: newProduct._id}
@@ -54,9 +55,13 @@ exports.updateProduct = async(req, res) => {
 }
 
 exports.deleteProduct = async(req, res) => {
-    const product = await Product.findByIdAndDelete(req.params.id);
-
+    
     try{
+        await Product.findByIdAndDelete(req.params.id);
+        await User.findByIdAndUpdate(req.user._id, {
+            $pull: { productsPosted: req.params.id }
+        });
+
         return res.status(204).json({
             status: "success",
             message: "Product deleted successfully"
@@ -71,7 +76,7 @@ exports.deleteProduct = async(req, res) => {
 
 exports.getAllProducts = async(req, res) => {
     try{
-        const seller = await User.findById(req.params.id).populate('productsPosted');
+        const seller = await User.findById(req.user._id).populate('productsPosted');
         const sellerProducts = seller.productsPosted;
 
         return res.status(200).json({
@@ -87,7 +92,5 @@ exports.getAllProducts = async(req, res) => {
         });
     }
 }
-
-
 
  

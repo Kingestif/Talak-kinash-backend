@@ -64,7 +64,7 @@ exports.viewAllUsers = async(req, res) => {
 
 exports.viewAllSellers = async(req, res) => {
     try{
-        const seller = await User.findOne({role: "seller"});
+        const seller = await User.find({role: "seller"});
         return res.status(200).json({
             status: "success",
             message: "Successfully fetched all sellers",

@@ -21,8 +21,10 @@ const ProductSchema = new mongoose.Schema({
         type: [String],
         required: [true, 'Product must have a tag'],
     },
-    images: [String], 
-
+    images: {
+        type: [String],
+        required: [true, 'product must have 1 or more image']
+    },
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',  

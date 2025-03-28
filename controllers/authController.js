@@ -10,12 +10,20 @@ const validator = require('validator');
 exports.signup = async(req,res,next)=>{
     
     try{
-        const {name, email, phoneNumber, password, role, gender, birthday, identification, referredBy, shopName, storeLocation, storeLink} = req.body;
+        const {name, email, phoneNumber, password, role, gender, birthday, referredBy, shopName, storeLocation, storeLink} = req.body;
+
+        // ----------Image
+        let identification = null;
+        if (req.file) {
+            identification = req.file.path; 
+        }
         
+        //-----------Store URL
         if (!validator.isURL(storeLink, { require_protocol: true })) {
             return res.status(400).json({ message: "Invalid URL format. Please provide a valid URL with http or https." });
         }
         
+        //----------Referral
         let referringUserId = null;
         if (referredBy) {
             const referringUser = await User.findOne({ referralCode: req.body.referredBy });
@@ -25,9 +33,12 @@ exports.signup = async(req,res,next)=>{
             referringUserId = referringUser._id; 
         }
 
+        //----------Birthdate
         const formattedBirthday = new Date(birthday);
+
         const newuser = await User.create({name, email, phoneNumber, password, role, gender, birthday: formattedBirthday, identification, referredBy: referringUserId, shopName, storeLocation, storeLink});
         
+        // ------------verificationToken
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
         newuser.verificationToken = hashedToken;
@@ -48,7 +59,8 @@ exports.signup = async(req,res,next)=>{
 
         res.status(201).json({
             status: 'success',
-            message: 'User registered! Please check your email for verification.'
+            message: 'User registered! Please check your email for verification.',
+            user: newuser
         });
 
     }catch(error){

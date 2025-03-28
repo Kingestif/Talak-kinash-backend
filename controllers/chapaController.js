@@ -12,7 +12,8 @@ exports.initializePayment = async (req, res) => {
       const seller = req.user;
       const previousPayment = await SellerPayment.findOne({sellerId: seller._id});
 
-      if (previousPayment.status === "success"){
+      console.log("PREV",previousPayment);
+      if (previousPayment && previousPayment.status === "success"){
         return res.status(400).json({message: "You already have an active subscription. Please wait until it expires before starting a new one."});
       }
 
