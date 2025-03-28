@@ -49,6 +49,7 @@ exports.signup = async(req,res,next)=>{
         
         const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
         const verificationUrl = `${baseUrl}/api/v1/auth/verify/${verificationToken}`;
+        console.log(baseUrl);
 
         // Send email
         await sendEmail({
@@ -132,11 +133,7 @@ exports.verifyEmail = async (req, res) => {
             expiresIn: process.env.JWT_EXPIRE
         });
 
-        res.status(200).json({
-            status: "success",
-            message: "Email verified successfully", 
-            token: token,
-        });
+        res.redirect(`${process.env.FRONTEND_URL}`);
 
     } catch (err) {
         res.status(500).json({ status: 'error', message: 'Server error' });
