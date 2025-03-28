@@ -31,10 +31,22 @@ const ProductSchema = new mongoose.Schema({
         required: [true, 'Product must have a seller'],
     },
     
-    isVerfied: {
+    // isVerfied: {
+    //     type: Boolean,
+    //     default: false, 
+    // },
+
+    isFeatured: {
         type: Boolean,
-        default: false, 
+        default: false
+    },
+
+    featuredUntil: {
+        type: Date,
+        default: null
     }
+
+
 
 },
     { timestamps: true }

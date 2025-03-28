@@ -175,3 +175,26 @@ exports.removeFromWishlist = async(req, res) => {
         });
     }
 }
+
+exports.getFeaturedProducts = async(req, res) => {
+    try{
+        const now = new Date();
+
+        const products = await Product.find({
+            isFeatured: true,
+            featuredUntil: {$gt: now}
+        }).sort({ featuredUntil: 1 });
+
+        res.status(200).json({
+            status: "success",
+            message: "Successfuly fetched featured products",
+            product: products
+        });
+
+    }catch(error){
+        res.status(500).json({
+            status: "error",
+            message: "Error fetching featured products"
+        });
+    }
+}

@@ -2,6 +2,7 @@ const User = require('../models/users');
 const SubscriptionPlan = require('../models/subscriptionSchema');
 const jwt = require('jsonwebtoken');
 const Product = require('../models/product');
+const Promotion = require('../models/promotion');
 
 
 exports.viewAdminProfile = async(req, res) => {
@@ -156,10 +157,31 @@ exports.updateSubscriptionPrice = async(req, res) => {
             data: plan
         });
     }catch(error){
-        console.log(error.message);
         res.status(400).json({
             status: "error",
             message: "failed to update subscription plan"
+        });
+    }
+}
+
+exports.updatePromotionPrice = async(req, res) => {
+    try{
+        const data = req.body;
+        const promotion = await Promotion.findOneAndUpdate(
+            {type: data.type}, 
+            {$set: {price: data.price}},
+            {new: true}
+        );
+        res.status(200).json({
+            status: "success",
+            message: "Promotion plan updated successfuly",
+            data: promotion
+        });
+ 
+    }catch(error){
+        res.status(400).json({
+            status: "error",
+            message: "failed to update promotion plan"
         });
     }
 }

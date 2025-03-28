@@ -4,6 +4,9 @@ const crypto = require('crypto');
 const User = require('../models/users');
 const SellerPayment = require('../models/sellerPayment');
 const SubscriptionPlan = require('../models/subscriptionSchema');
+const PromotePayment = require('../models/promotionPayment');
+const Product = require('../models/product');
+const Promotion = require('../models/promotion');
 
 const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);  
 
@@ -24,9 +27,8 @@ exports.initializePayment = async (req, res) => {
       }
 
       const subscription = await SubscriptionPlan.findOne({type: subscriptionType});
-      amount = subscription.price;
-
-      console.log("updated Amount", amount);
+      const amount = subscription.price;
+      const tx_ref = `subscription_${Date.now()}_${seller._id}`;
 
       const customerInfo = {
         amount,
@@ -34,14 +36,15 @@ exports.initializePayment = async (req, res) => {
         email: seller.email,
         first_name,
         last_name,
-        callback_url: "https://talakkinash/verified.com/", 
+        callback_url: process.env.CALLBACKURL_FOR_SUBSCRIPTION,
         customization: {
-          title: "Deal & Promotion Payment",
+          title: "Subscription Payment",
           description: "Secure Payment via Chapa",
         },
+        tx_ref
       };
 
-      const response = await chapa.initialize(customerInfo, { autoRef: true });
+      const response = await chapa.initialize(customerInfo);
   
       if (response.status === "success") {
         const newPayment = await SellerPayment.create({
@@ -85,22 +88,52 @@ exports.paymentVerification = async (req, res) => {
   
     const event = req.body.event;
     const userTx_ref = req.body.tx_ref;
-  
+
     if(event === "charge.success"){
       console.log("Payment success event received");
-      const sellerPayment = await SellerPayment.findOneAndUpdate(
-        {tx_ref: userTx_ref},
-        {$set: {status: "success"}},
-        {new: true}
-      );
 
-      if (!sellerPayment) {
-        console.log("Payment not found for tx_ref:", userTx_ref);
-        return res.status(404).json({ message: "Payment not found" });
+      if(userTx_ref.startsWith("subscription_")){
+        console.log("SUBSCRIPTION PAID");
+        const sellerPayment = await SellerPayment.findOneAndUpdate(
+          {tx_ref: userTx_ref},
+          {$set: {status: "success"}},
+          {new: true}
+        );
+  
+        if (!sellerPayment) {
+          return res.status(404).json({ message: "Payment not found" });
+        }
+    
+        return res.status(200).json({ message: "Subscription Payment verified successfully"});
+
+      }else if(userTx_ref.startsWith("promotion_")){
+        console.log("PROMOTION PAID");
+        const promotionPayment = await PromotePayment.findOneAndUpdate(
+          {tx_ref: userTx_ref},
+          {$set: {status: "success"}},
+          {new: true, runValidators: true}
+        );
+
+        if (!promotionPayment) {
+          return res.status(404).json({ message: "Payment not found" });
+        }
+
+        const now = new Date();
+        const productId = promotionPayment.productId;
+        const promotion = await Promotion.findOne({type: promotionPayment.promotionPlan});
+
+        const product = await Product.findByIdAndUpdate(productId,
+          {isFeatured: true, featuredUntil: new Date(now.getTime() + promotion.duration)},
+          {new: true, runValidators: true}
+        );
+
+        return res.status(200).json({ message: "Promotion Payment verified successfully"});
+
+      }else {
+        console.log("Unknown transaction type");
       }
-  
-      return res.status(200).json({ message: "Payment verified successfully"});
-  
+
+      // ---------------------Other responses 
     }else if(event === "charge.failed"){
       console.log("Payment failed event received");
       return res.status(200).json({ message: "Payment failed"});
@@ -130,9 +163,10 @@ exports.paymentVerification = async (req, res) => {
 exports.sellerPaymentVerified = async(req, res, next) => {
   try{
     const sellerId = req.user._id;
-    const order = await SellerPayment.findOne({sellerId: sellerId}).sort({createdAt: -1});
+    console.log("VERIFICATION VP", req.user.email);
+    const payment = await SellerPayment.findOne({sellerId: sellerId}).sort({createdAt: -1});
 
-    if(!order || order.status !== "success"){
+    if(!payment || payment.status !== "success"){
       return res.status(404).json({
         status: "error",
         message: "Please Subscribe to do this operation"
