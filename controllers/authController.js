@@ -17,16 +17,18 @@ exports.signup = async(req,res,next)=>{
         if (req.file) {
             identification = req.file.path; 
         }
-        
+
         //-----------Store URL
-        if (!validator.isURL(storeLink, { require_protocol: true })) {
-            return res.status(400).json({ message: "Invalid URL format. Please provide a valid URL with http or https." });
+        if(storeLink){
+            if (!validator.isURL(storeLink, { require_protocol: true })) {
+                return res.status(400).json({ message: "Invalid URL format. Please provide a valid URL with http or https." });
+            }
         }
         
         //----------Referral
         let referringUserId = null;
         if (referredBy) {
-            const referringUser = await User.findOne({ referralCode: req.body.referredBy });
+            const referringUser = await User.findOne({ referralCode: referredBy });
             if (!referringUser) {
                 return res.status(400).json({ message: "Invalid referral code" });
             }
@@ -34,8 +36,11 @@ exports.signup = async(req,res,next)=>{
         }
 
         //----------Birthdate
-        const formattedBirthday = new Date(birthday);
-
+        let formattedBirthday = null;
+        if(birthday){
+            formattedBirthday = new Date(birthday);
+        }
+        
         const newuser = await User.create({name, email, phoneNumber, password, role, gender, birthday: formattedBirthday, identification, referredBy: referringUserId, shopName, storeLocation, storeLink});
         
         // ------------verificationToken
@@ -228,7 +233,7 @@ exports.isUser = (req,res,next) =>{
     if(userRole !== 'user'){
         return res.status(403).json({
             status: "error",
-            message: "Your not authorized to do this operation",
+            message: "You must be a User to this operation",
         });
     }
     next();
@@ -240,7 +245,7 @@ exports.isAdmin = (req,res,next) =>{
     if(userRole !== 'admin'){
         return res.status(403).json({
             status: "error",
-            message: "Your not authorized to do this operation",
+            message: "You must be an Admin to do this operation",
         });
     }
     next();
@@ -252,7 +257,7 @@ exports.isSeller = (req,res,next) =>{
     if(user.role !== 'seller' || user.sellerVerified === false){
         return res.status(403).json({
             status: "error",
-            message: "Your not authorized to do this operation",
+            message: "You must be Seller to do this operation",
         });
     }
     next();

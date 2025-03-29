@@ -5,13 +5,13 @@ const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotific
 const {protect, verify, isUser} = require('../controllers/authController');
 
 
-router.route('/profile').get(protect, verify, isUser, getUserProfile).patch(protect, verify, isUser, updateUserProfile);
-router.route('/search').get(protect, verify, isUser, searchProduct).post(protect, verify, isUser, scanBarcode);
-router.route('/notifications').get(protect, verify, isUser, getNotification);
-router.route('/wishlist').get(protect, verify, isUser, getFromWishlist);
-router.route('/wishlist/:id').post(protect, verify, isUser, addToWishlist);
-router.route('/wishlist/:productId').delete(protect, verify, isUser, removeFromWishlist);
-router.route('/featured-products').get(protect, verify, isUser, getFeaturedProducts);
+router.route('/profile').get(protect, isUser, getUserProfile).patch(protect, isUser, updateUserProfile);
+router.route('/search').get(protect, isUser, searchProduct).post(protect, isUser, scanBarcode);
+router.route('/notifications').get(protect, isUser, getNotification);
+router.route('/wishlist').get(protect, isUser, getFromWishlist);
+router.route('/wishlist/:id').post(protect, isUser, addToWishlist);
+router.route('/wishlist/:productId').delete(protect, isUser, removeFromWishlist);
+router.route('/featured-products').get(protect, isUser, getFeaturedProducts);
 
 module.exports =  router;
     
