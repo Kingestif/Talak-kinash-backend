@@ -145,24 +145,18 @@ exports.verifyEmail = async (req, res) => {
         const user = await User.findOne({ verificationToken: hashedToken });
 
         if (!user) {
-            const alreadyVerifiedUser = await User.findOne({ emailVerified: true });
-
-            if (alreadyVerifiedUser) {
-                return res.redirect(`${process.env.FRONTEND_URL}?message=Already Verified`);
-            }
-
             return res.status(400).json({ status: 'error', message: 'Invalid or expired token' });
         }
 
         if (user.emailVerified) {
-            return res.redirect(`${process.env.FRONTEND_URL}`);
+            return res.redirect(`${process.env.FRONTEND_URL}?message=Already Verified`);
         }
 
-        user.emailVerified = true;   
-        user.verificationToken = undefined; 
+        user.emailVerified = true;
+        user.verificationToken = undefined;
         await user.save();
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRE
         });
 
@@ -170,7 +164,8 @@ exports.verifyEmail = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
-            maxAge: process.env.JWT_EXPIRE * 1000
+            path: "/",
+            maxAge: Number(process.env.JWT_EXPIRE) * 1000
         });
 
         res.redirect(`${process.env.FRONTEND_URL}`);
@@ -179,6 +174,7 @@ exports.verifyEmail = async (req, res) => {
         res.status(500).json({ status: 'error', message: 'Server error' });
     }
 };
+
 
 exports.protect = async(req,res,next) =>{       
     let token = '';
