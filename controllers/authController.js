@@ -140,25 +140,37 @@ exports.confirmLink = async (req, res) => {
 
 
 exports.verifyEmail = async (req, res) => {
+    console.log("VERIFYEMAIL 1");
     try {
+        console.log("VERIFYEMAIL 2");
+
         const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
         const user = await User.findOne({ verificationToken: hashedToken });
+        console.log("VERIFYEMAIL 3");
+
 
         if (!user) {
             return res.status(400).json({ status: 'error', message: 'Invalid or expired token' });
         }
 
+        console.log("VERIFYEMAIL 4");
+
         if (user.emailVerified) {
             return res.redirect(`${process.env.FRONTEND_URL}?message=Already Verified`);
         }
+        console.log("VERIFY 5");
 
         user.emailVerified = true;
         user.verificationToken = undefined;
         await user.save();
 
+        console.log("VERIFY 6");
+
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRE
         });
+
+        console.log("VERIFY 7");
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -168,10 +180,12 @@ exports.verifyEmail = async (req, res) => {
             maxAge: Number(process.env.JWT_EXPIRE) * 1000
         });
 
+        console.log("VERIFY 8");
+
         res.redirect(`${process.env.FRONTEND_URL}`);
 
     } catch (err) {
-        res.status(500).json({ status: 'error', message: 'Server error' });
+        res.status(500).json({ status: 'error', message: err.message});
     }
 };
 
