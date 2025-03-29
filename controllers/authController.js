@@ -48,7 +48,7 @@ exports.signup = async(req,res,next)=>{
         newuser.password = undefined;
         
         const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
-        const verificationUrl = `${baseUrl}/api/v1/auth/verify/${verificationToken}`;
+        const verificationUrl = `${baseUrl}/api/v1/auth/confirmation-link/${verificationToken}`;
         console.log(baseUrl);
 
         // Send email
@@ -115,6 +115,29 @@ exports.login = async(req,res,next) =>{
         });
     }
 }
+
+exports.confirmLink = async (req, res) => {
+    try {
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const user = await User.findOne({ verificationToken: hashedToken });
+
+        if (!user) {
+            return res.status(400).send("<h1>Invalid or expired token</h1>");
+        }
+
+        return res.send(`
+            <h1>Email Verification</h1>
+            <p>Click the button below to verify your email.</p>
+            <form action="/api/v1/auth/verify/${req.params.token}" method="POST">
+                <button type="submit">Verify Email</button>
+            </form>
+        `);
+
+    } catch (err) {
+        res.status(500).send("<h1>Server error</h1>");
+    }
+};
+
 
 exports.verifyEmail = async (req, res) => {
     try {
