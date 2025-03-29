@@ -5,22 +5,12 @@ const Product = require('../models/product');
 exports.getUserProfile = async(req, res) => {
     
     try{
-        const user = {
-            id: req.user._id,
-            name: req.user.name,
-            email: req.user.email,
-            phoneNumber: req.user.phoneNumber,
-            gender: req.user.gender,
-            birthday: req.user.birthday.toISOString().split('T')[0],
-            referralCode: req.user.referralCode,
-            role: req.user.role
-        }
 
         return res.status(200).json({
             status: "success",
             message: "User information fetched successfully",
             data: {
-                user: user,
+                user: req.user,
             }
         });
 
