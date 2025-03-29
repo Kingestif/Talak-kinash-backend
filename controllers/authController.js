@@ -128,7 +128,7 @@ exports.confirmLink = async (req, res) => {
         return res.send(`
             <h1>Email Verification</h1>
             <p>Click the button below to verify your email.</p>
-            <form action="/api/v1/auth/verify/${req.params.token}" method="POST">
+            <form action="${process.env.BASE_URL}/api/v1/auth/verify/${req.params.token}" method="POST">
                 <button type="submit">Verify Email</button>
             </form>
         `);
@@ -145,7 +145,17 @@ exports.verifyEmail = async (req, res) => {
         const user = await User.findOne({ verificationToken: hashedToken });
 
         if (!user) {
+            const alreadyVerifiedUser = await User.findOne({ emailVerified: true });
+
+            if (alreadyVerifiedUser) {
+                return res.redirect(`${process.env.FRONTEND_URL}?message=Already Verified`);
+            }
+
             return res.status(400).json({ status: 'error', message: 'Invalid or expired token' });
+        }
+
+        if (user.emailVerified) {
+            return res.redirect(`${process.env.FRONTEND_URL}`);
         }
 
         user.emailVerified = true;   
@@ -154,6 +164,13 @@ exports.verifyEmail = async (req, res) => {
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRE
+        });
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+            maxAge: process.env.JWT_EXPIRE * 1000
         });
 
         res.redirect(`${process.env.FRONTEND_URL}`);
