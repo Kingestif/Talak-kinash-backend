@@ -172,13 +172,18 @@ exports.verifyEmail = async (req, res) => {
 
         console.log("VERIFY 7");
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict",
-            path: "/",
-            maxAge: Number(process.env.JWT_EXPIRE) * 1000
-        });
+        try {
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "Strict",
+                path: "/",
+                maxAge: Number(process.env.JWT_EXPIRE) * 1000
+            });
+            console.log("Cookie Set Successfully");
+        } catch (cookieError) {
+            console.error("Cookie Setting Error:", cookieError);
+        }
 
         console.log("VERIFY 8");
 
