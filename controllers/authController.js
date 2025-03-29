@@ -159,14 +159,6 @@ exports.verifyEmail = async (req, res) => {
             expiresIn: process.env.JWT_EXPIRE
         });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict",
-            path: "/",
-            maxAge: Number(process.env.JWT_EXPIRE) * 1000
-        });
-
         res.redirect(`${process.env.FRONTEND_URL}`);
 
     } catch (err) {
