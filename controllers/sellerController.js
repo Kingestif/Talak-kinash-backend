@@ -13,6 +13,12 @@ exports.postProduct = async(req, res) => {
 
         // ---product image
         let images = [];
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                status: "error",
+                message: "At least one image is required"
+            });
+        }
         
         if (req.files) {
             images = req.files.map(file => file.path);
@@ -33,7 +39,7 @@ exports.postProduct = async(req, res) => {
 
     }catch(error){
         console.log(error.message);
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to upload product"
         });

@@ -11,11 +11,9 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'product_images', 
-        format: async (req, file) => 'png', 
-        public_id: (req, file) => Date.now() + '-' + file.originalname 
-    }
+    params: async (req, file) => ({
+        folder: 'product_images',
+    })
 });
 
 const productImageUpload = multer({ storage });
