@@ -77,15 +77,18 @@ const ProductSchema = new mongoose.Schema({
 //     return {
 //         name: faker.commerce.productName(), 
 //         description: faker.commerce.productDescription(), 
-//         price: faker.commerce.price(), 
+//         price: parseInt(faker.commerce.price(), 10), 
 //         category: category,
 //         tag: faker.helpers.arrayElements(categoryTagMap[category], { min: 1, max: 1}),
-//         images: [faker.image.url()], 
+//         images: [{
+//             url: faker.image.url(),  // Correct URL generation
+//             tags: ["newtag"]         // Correct tags array structure
+//         }],
 //         seller: faker.database.mongodbObjectId(), 
 //     };
 // }
 
-// const fakeProduct = Array.from({ length: 5 }, createRandomProduct); 
+// const fakeProduct = Array.from({ length: 200 }, createRandomProduct); 
 
 
 const Product = mongoose.model('Product', ProductSchema); 

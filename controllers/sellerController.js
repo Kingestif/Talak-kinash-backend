@@ -23,30 +23,6 @@ exports.postProduct = async(req, res) => {
             });
         }
         
-        // if (req.files) {
-        //     // Here you can log the response from Cloudinary
-        //     images = req.files.map(file => {
-        //         console.log("Cloudinary file upload response: ", file); // This will log the full Cloudinary response (including URL, public_id, etc.)
-        //         return file.path;  // Or file.url if you're interested in the public URL directly
-        //     });
-        // }
-
-        // if (req.files) {
-        //     for (let file of req.files) {
-        //         console.log("Cloudinary Response:", file); 
-
-        //         const imageUrl = file.path;     //each uploaded imgUrl
-        //         const fileTags = file.tags || [];   //each uploaded tags
-
-        //         images.push({
-        //             url: imageUrl,
-        //             tags: fileTags 
-        //         });
-
-        //         tag = [...new Set([...tag, ...fileTags])];
-        //     }
-        // }
-
         if (req.files) {
             for (let file of req.files) {
                 const imageUrl = file.path;  // Cloudinary URL

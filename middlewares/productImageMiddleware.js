@@ -13,8 +13,8 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => ({
         folder: 'product_images',
-        categorization: "google_tagging",
-        auto_tagging: 0.7
+        // categorization: "google_tagging",
+        // auto_tagging: 0.7
     })
 });
 

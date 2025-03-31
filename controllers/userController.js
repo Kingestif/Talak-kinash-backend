@@ -188,3 +188,50 @@ exports.getFeaturedProducts = async(req, res) => {
         });
     }
 }
+
+exports.filterByCategory = async(req, res) => {
+    try{
+        const { category, minPrice, maxPrice, sort, page = 1, limit = 20 } = req.query;
+        let query = {category};
+
+        // price filter
+        if(minPrice || maxPrice){
+            query.price = {};
+            if (minPrice) query.price.$gte = parseFloat(minPrice);
+            if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+        }
+
+        // sorting
+        let sorting = {};
+        if(sort === "price") sorting.price = 1;
+        if(sort === "-price") sorting.price = -1;
+        if(sort === "latest") sorting.createdAt = -1;
+
+        // pagination
+        const pageNumber = parseInt(page, 10);
+        const pageSize = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * pageSize;
+
+        const product = await Product.find(query).sort(sorting).skip(skip).limit(pageSize);
+
+        if(!product || !product.length){
+            return res.status(200).json({
+                status: "success",
+                products:  []
+            });
+        }
+    
+        return res.status(200).json({
+            status: "success",
+            message: `Successfull fetched ${category} products`,
+            length: product.length,
+            product: product
+        });
+
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            message: `Failed to fetch ${category} products`,
+        });
+    }
+}

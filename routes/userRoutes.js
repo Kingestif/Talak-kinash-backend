@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts} = require('../controllers/userController');
+const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory} = require('../controllers/userController');
 const {protect, verify, isUser} = require('../controllers/authController');
 
 
@@ -12,6 +12,7 @@ router.route('/wishlist').get(protect, isUser, getFromWishlist);
 router.route('/wishlist/:id').post(protect, isUser, addToWishlist);
 router.route('/wishlist/:productId').delete(protect, isUser, removeFromWishlist);
 router.route('/featured-products').get(protect, isUser, getFeaturedProducts);
+router.route('/filterCategory').get(protect, isUser, filterByCategory);
 
 module.exports =  router;
     
