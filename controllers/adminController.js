@@ -220,3 +220,21 @@ exports.updatePromotionPrice = async(req, res) => {
         });
     }
 }
+
+exports.deletePromotionPlan = async(req, res) => {
+    try{
+        const productId = req.params.id;
+        await Promotion.findByIdAndDelete(productId);
+        
+        return res.status(204).json({
+            status: "success",
+            message: "Promotion plan deleted successfuly",
+        });
+ 
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            message: "failed to delete promotion plan"
+        });
+    }
+}

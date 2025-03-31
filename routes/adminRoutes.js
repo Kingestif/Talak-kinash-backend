@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {viewAdminProfile, viewUserProfile, viewAllUsers, viewAllSellers, viewAllProducts, pendingSellers, approveSeller, updateSubscriptionPrice, updatePromotionPrice, addPromotionPlan, getPromotionPlans} = require('../controllers/adminController');
+const {viewAdminProfile, viewUserProfile, viewAllUsers, viewAllSellers, viewAllProducts, pendingSellers, approveSeller, updateSubscriptionPrice, updatePromotionPrice, addPromotionPlan, getPromotionPlans, deletePromotionPlan} = require('../controllers/adminController');
 const {protect, verify, isAdmin} = require('../controllers/authController');
 
 router.route('/me').get(protect, isAdmin, viewAdminProfile);
@@ -14,4 +14,5 @@ router.route('/updatePlan').patch(protect, isAdmin, updateSubscriptionPrice);
 router.route('/updatePromotion/:id').patch(protect, isAdmin, updatePromotionPrice);
 router.route('/createPromotion').post(protect, isAdmin, addPromotionPlan);
 router.route('/getPromotion').get(protect, isAdmin, getPromotionPlans);
+router.route('/deletePromotion/:id').delete(protect, isAdmin, deletePromotionPlan);
 module.exports = router;
