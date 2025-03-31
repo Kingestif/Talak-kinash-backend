@@ -16,6 +16,8 @@ exports.signup = async(req,res,next)=>{
         let identification = null;
         if (req.file) {
             identification = req.file.path; 
+        }else{
+            return res.status(400).json({message: "Please insert your id"});
         }
 
         //-----------Store URL
@@ -111,6 +113,7 @@ exports.login = async(req,res,next) =>{
         res.status(200).json({
             status: "success",
             token: token,
+            role: user.role
         });
 
     }catch(error){

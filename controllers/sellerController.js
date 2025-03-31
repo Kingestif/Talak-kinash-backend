@@ -5,14 +5,17 @@ const Chapa = require("chapa");
 const crypto = require('crypto');
 const Promotion = require('../models/promotion');
 const PromotePayment = require('../models/promotionPayment');
-const chapa = new Chapa(process.env.CHAPA_SECRET_KEY); 
+const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);
+const cloudinary = require('cloudinary').v2; 
 
 exports.postProduct = async(req, res) => {
     try{
-        const {name, description, price, category, tag} = req.body;
+        const {name, description, price, category} = req.body;
 
         // ---product image
         let images = [];
+        let tag = [];
+
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 status: "error",
@@ -20,9 +23,54 @@ exports.postProduct = async(req, res) => {
             });
         }
         
+        // if (req.files) {
+        //     // Here you can log the response from Cloudinary
+        //     images = req.files.map(file => {
+        //         console.log("Cloudinary file upload response: ", file); // This will log the full Cloudinary response (including URL, public_id, etc.)
+        //         return file.path;  // Or file.url if you're interested in the public URL directly
+        //     });
+        // }
+
+        // if (req.files) {
+        //     for (let file of req.files) {
+        //         console.log("Cloudinary Response:", file); 
+
+        //         const imageUrl = file.path;     //each uploaded imgUrl
+        //         const fileTags = file.tags || [];   //each uploaded tags
+
+        //         images.push({
+        //             url: imageUrl,
+        //             tags: fileTags 
+        //         });
+
+        //         tag = [...new Set([...tag, ...fileTags])];
+        //     }
+        // }
+
         if (req.files) {
-            images = req.files.map(file => file.path);
+            for (let file of req.files) {
+                const imageUrl = file.path;  // Cloudinary URL
+                const filename = file.filename; // Cloudinary filename (needed to fetch details)
+
+                // Fetch tags from Cloudinary API
+                const cloudinaryResult = await cloudinary.api.resource(filename, {
+                    image_metadata: true,
+                    colors: true,
+                    tags: true
+                });
+
+                // Retrieve the tags from the Cloudinary response
+                const fileTags = cloudinaryResult.tags || [];
+
+                images.push({
+                    url: imageUrl,
+                    tags: fileTags
+                });
+
+                tag = [...new Set([...tag, ...fileTags])];  // Combine all unique tags
+            }
         }
+        
         const seller = req.user._id;
 
         const newProduct = await Product.create({name, description, price, category, tag, images, seller});

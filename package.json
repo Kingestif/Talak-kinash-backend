@@ -13,7 +13,7 @@
     "bcrypt": "^5.1.1",
     "chapa": "^1.0.5",
     "chapa-nodejs": "^2.0.1",
-    "cloudinary": "^2.6.0",
+    "cloudinary": "^1.21.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",

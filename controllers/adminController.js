@@ -84,14 +84,14 @@ exports.viewAllProducts = async(req, res) => {
     try{
         const products = await Product.find();
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             message: "Successfully fetched all products",
             data: products
         });
 
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Failed to fetched all products"
         });
@@ -101,7 +101,7 @@ exports.viewAllProducts = async(req, res) => {
 exports.pendingSellers = async(req, res) => {
     try{
         const pendingSeller = await User.find({role: 'seller', sellerVerified: false});
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             message: "Pending sellers fetched successfully",
             data: {
@@ -136,7 +136,7 @@ exports.approveSeller = async(req, res) => {
         });
 
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "Failed to approve the seller"
         })
@@ -151,35 +151,70 @@ exports.updateSubscriptionPrice = async(req, res) => {
             {$set: {price: data.price}},
             {new: true}
         );
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             message: "Subscription plan updated successfuly",
             data: plan
         });
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "failed to update subscription plan"
         });
     }
 }
 
+exports.addPromotionPlan = async(req, res) => {
+    try{
+        const {type, price, duration} = req.body;
+        const newPlan = await Promotion.create({type, price, duration});
+
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully added promotion plan"
+        });
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            message: error.message
+        });
+    }
+}
+
+exports.getPromotionPlans = async(req, res) => {
+    try{
+        const plans = await Promotion.find();
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully fetched promotion plans",
+            plan: plans
+        });
+
+    }catch(error){
+        return res.status(400).json({
+            status: "error",
+            message: error.message
+        });
+    }
+}
+
 exports.updatePromotionPrice = async(req, res) => {
     try{
-        const data = req.body;
-        const promotion = await Promotion.findOneAndUpdate(
-            {type: data.type}, 
-            {$set: {price: data.price}},
-            {new: true}
+        const promotionId = req.params.id; 
+        const updatedata = req.body;
+        const promotion = await Promotion.findByIdAndUpdate(promotionId,
+            updatedata,
+            {new: true, runValidators: true}
         );
-        res.status(200).json({
+
+        return res.status(200).json({
             status: "success",
             message: "Promotion plan updated successfuly",
             data: promotion
         });
  
     }catch(error){
-        res.status(400).json({
+        return res.status(400).json({
             status: "error",
             message: "failed to update promotion plan"
         });
