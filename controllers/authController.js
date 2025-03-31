@@ -16,10 +16,8 @@ exports.signup = async(req,res,next)=>{
         let identification = null;
         if (req.file) {
             identification = req.file.path; 
-        }else{
-            return res.status(400).json({message: "Please insert your id"});
         }
-
+        
         //-----------Store URL
         if(storeLink){
             if (!validator.isURL(storeLink, { require_protocol: true })) {
