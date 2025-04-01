@@ -47,21 +47,6 @@ exports.updateUserProfile = async(req, res) => {
     }
 }
 
-exports.searchProduct = async(req, res) => {
-    try{
-        res.status(200).json({
-            status: "success",
-            message: "Product found"
-        });
-
-    }catch(error){
-        res.status(400).json({
-            status: "error",
-            message: "Failed to find product"
-        });
-    }
-}
-
 exports.scanBarcode = async(req, res) => {
     try{
         res.status(200).json({
@@ -175,14 +160,14 @@ exports.getFeaturedProducts = async(req, res) => {
             featuredUntil: {$gt: now}
         }).sort({ featuredUntil: 1 });
 
-        res.status(200).json({
+        return res.status(200).json({
             status: "success",
             message: "Successfuly fetched featured products",
             product: products
         });
 
     }catch(error){
-        res.status(500).json({
+        return res.status(500).json({
             status: "error",
             message: "Error fetching featured products"
         });
@@ -192,6 +177,11 @@ exports.getFeaturedProducts = async(req, res) => {
 exports.filterByCategory = async(req, res) => {
     try{
         const { category, minPrice, maxPrice, sort, page = 1, limit = 20 } = req.query;
+
+        if (!category) {
+            return res.status(400).json({ status: "error", message: "Category is required" });
+        }
+
         let query = {category};
 
         // price filter
@@ -212,6 +202,7 @@ exports.filterByCategory = async(req, res) => {
         const pageSize = parseInt(limit, 10);
         const skip = (pageNumber - 1) * pageSize;
 
+        
         const product = await Product.find(query).sort(sorting).skip(skip).limit(pageSize);
 
         if(!product || !product.length){
@@ -225,13 +216,63 @@ exports.filterByCategory = async(req, res) => {
             status: "success",
             message: `Successfull fetched ${category} products`,
             length: product.length,
-            product: product
+            products: product
         });
 
     }catch(error){
         return res.status(400).json({
             status: "error",
             message: `Failed to fetch ${category} products`,
+        });
+    }
+}
+
+exports.searchProduct = async(req, res) => {
+    try{
+        const { word, minPrice, maxPrice, sort, page = 1, limit = 20 } = req.query;
+        let query = {};
+
+
+        if (!word) {
+            return res.status(400).json({message: "please insert search keyword"});  
+        }
+
+        query.$text = { $search: word };
+
+        // price
+        if(minPrice || maxPrice){
+            query.price = {};
+            if (minPrice) query.price.$gte = parseFloat(minPrice);
+            if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+        }
+
+        // sorting
+        let sorting = {};
+        sorting.score = { $meta: "textScore" };     //IMPORTANT!! this will sort our products by relevance! based on score they get from $text otherwise we will just get the products BUT in random ordering wh is not good. But now it will use the score specified on schema "weight"
+
+        if (sort === "price") sorting.price = 1;
+        if (sort === "-price") sorting.price = -1;
+        if (sort === "latest") sorting.createdAt = -1;
+
+        // pagination
+        const pageNumber = parseInt(page, 10);
+        const pageSize = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * pageSize;
+
+        let products = await Product.find(query).sort(sorting).skip(skip).limit(pageSize).select({ score: { $meta: "textScore" } });
+
+        return res.status(200).json({
+            status: "success",
+            message: "Products found",
+            length: products.length,
+            products: products
+        });
+
+    }catch(error){
+        console.log(error.message);
+        return res.status(400).json({
+            status: "error",
+            message: "Failed to find product"
         });
     }
 }

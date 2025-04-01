@@ -90,6 +90,7 @@ const ProductSchema = new mongoose.Schema({
 
 // const fakeProduct = Array.from({ length: 200 }, createRandomProduct); 
 
+ProductSchema.index({ name: 'text', description: 'text', tag: 'text' }, { weights: {name: 10, description: 5, tags: 2}});
 
 const Product = mongoose.model('Product', ProductSchema); 
 
