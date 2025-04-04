@@ -5,6 +5,7 @@ yarn-error.log
 
 # Environment variables
 .env
+.venv/
 
 # Logs
 logs
@@ -26,3 +27,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Python cache files
+__pycache__/
+*.pyc

@@ -25,6 +25,8 @@ const ProductSchema = new mongoose.Schema({
     images: [{
         url: String,
         tags: [String],
+        public_id: String,     
+        embedding: [Number],
     }],
     
     seller: {

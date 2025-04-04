@@ -12,12 +12,10 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => ({
-        folder: 'product_images',
-        categorization: "google_tagging",
-        auto_tagging: 0.7
+        folder: 'similar_images',
     })
 });
 
-const productImageUpload = multer({ storage });
+const similarUpload = multer({ storage });
 
-module.exports = productImageUpload;
+module.exports = similarUpload;

@@ -1,5 +1,9 @@
 const User = require('../models/users');
 const Product = require('../models/product'); 
+const cloudinary = require('cloudinary').v2; 
+const axios = require('axios'); 
+require('dotenv').config();
+
 
 
 exports.getUserProfile = async(req, res) => {
@@ -273,6 +277,70 @@ exports.searchProduct = async(req, res) => {
         return res.status(400).json({
             status: "error",
             message: "Failed to find product"
+        });
+    }
+}
+
+exports.findSimilarImages = async(req, res) => {
+    try {
+        if(!req.file){
+            return res.status(400).json({
+                status: "error",
+                message: "please upload an image"
+            });
+        }
+        const imageUrl = req.file.path;
+
+        const response = await axios.post(`${BASE_URL}/find-similar-images`, {
+            image_url: imageUrl
+        });
+
+        if (!response.data || !response.data.similar_images || response.data.similar_images.length === 0) {
+            return res.status(404).json({
+                status: "error",
+                message: "No similar products found"
+            });
+        }
+
+        const productIds = response.data.similar_images.map(image => image.product_id);
+        const products = await Product.find({ '_id': { $in: productIds } });
+
+        const similarProducts = response.data.similar_images.map(image => {
+            const product = products.find(p => p._id.toString() === image.product_id);
+            if (product) {
+                return {
+                    imageUrl: image.image_url,  // URL of the similar image
+                    similarityScore: image.similarity_score,  
+                    product: {  
+                        productId: product._id,
+                        name: product.name,
+                        description: product.description,
+                        price: product.price,
+                        category: product.category,
+                        tag: product.tag
+                    }
+                };
+            }
+        }).filter(product => product); 
+
+        if (similarProducts.length > 0) {
+            return res.status(200).json({
+                status: "success",
+                message: "Successfully found similar products",
+                similar_products: similarProducts
+            });
+        } else {
+            return res.status(404).json({
+                status: "error",
+                message: "No similar products found in the database"
+            });
+        }
+
+    } catch (error) {
+        console.error("Error searching for similar images:", error);
+        return res.status(500).json({
+            status: "error",
+            message: "Unable to find similar products",
         });
     }
 }

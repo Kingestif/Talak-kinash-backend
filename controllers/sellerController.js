@@ -7,6 +7,7 @@ const Promotion = require('../models/promotion');
 const PromotePayment = require('../models/promotionPayment');
 const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);
 const cloudinary = require('cloudinary').v2; 
+const axios = require('axios'); 
 
 exports.postProduct = async(req, res) => {
     try{
@@ -26,24 +27,35 @@ exports.postProduct = async(req, res) => {
         if (req.files) {
             for (let file of req.files) {
                 const imageUrl = file.path;  // Cloudinary URL
-                const filename = file.filename; // Cloudinary filename (needed to fetch details)
+                const filename = file.filename; 
 
-                // Fetch tags from Cloudinary API
                 const cloudinaryResult = await cloudinary.api.resource(filename, {
                     image_metadata: true,
                     colors: true,
                     tags: true
                 });
 
-                // Retrieve the tags from the Cloudinary response
                 const fileTags = cloudinaryResult.tags || [];
+
+                
+                tag = [...new Set([...tag, ...fileTags])];  
+                
+                // Sent the image URL to FastAPI to get the embedding
+                const response = await axios.post(`${BASE_URL}/get-embedding`, {
+                    image_url: imageUrl
+                });
+
+                let embedding = [];
+                if (response.data.embedding) {
+                    embedding = response.data.embedding;  
+                }
 
                 images.push({
                     url: imageUrl,
-                    tags: fileTags
+                    tags: fileTags,
+                    public_id: cloudinaryResult.public_id,  
+                    embedding: embedding,
                 });
-
-                tag = [...new Set([...tag, ...fileTags])];  // Combine all unique tags
             }
         }
         
