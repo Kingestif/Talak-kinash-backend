@@ -41,7 +41,7 @@ exports.postProduct = async(req, res) => {
                 tag = [...new Set([...tag, ...fileTags])];  
                 
                 // Sent the image URL to FastAPI to get the embedding
-                const response = await axios.post(`${BASE_URL}/get-embedding`, {
+                const response = await axios.post(`${process.env.CLIPAI_BASE_URL}/get-embedding`, {
                     image_url: imageUrl
                 });
 

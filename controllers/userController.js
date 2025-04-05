@@ -291,7 +291,7 @@ exports.findSimilarImages = async(req, res) => {
         }
         const imageUrl = req.file.path;
 
-        const response = await axios.post(`${BASE_URL}/find-similar-images`, {
+        const response = await axios.post(`${process.env.CLIPAI_BASE_URL}/find-similar-images`, {
             image_url: imageUrl
         });
 
