@@ -10,7 +10,7 @@ const validator = require('validator');
 exports.signup = async(req,res,next)=>{
     
     try{
-        const {name, email, phoneNumber, password, role, gender, birthday, referredBy, shopName, storeLocation, storeLink} = req.body;
+        const {name, email, phoneNumber, password, role, gender, birthday, referredBy, shopName, storeLocation, storeLink, chapaApi} = req.body;
 
         // ----------Image
         let identification = null;
@@ -41,7 +41,7 @@ exports.signup = async(req,res,next)=>{
             formattedBirthday = new Date(birthday);
         }
         
-        const newuser = await User.create({name, email, phoneNumber, password, role, gender, birthday: formattedBirthday, identification, referredBy: referringUserId, shopName, storeLocation, storeLink});
+        const newuser = await User.create({name, email, phoneNumber, password, role, gender, birthday: formattedBirthday, identification, referredBy: referringUserId, shopName, storeLocation, storeLink, chapaApi});
         
         // ------------verificationToken
         const verificationToken = crypto.randomBytes(32).toString('hex');

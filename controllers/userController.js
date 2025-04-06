@@ -344,3 +344,75 @@ exports.findSimilarImages = async(req, res) => {
         });
     }
 }
+
+exports.storeCategory = async(req, res) => {
+    try{
+        const categories = req.body.categories;
+        if(!categories){
+            return res.status(400).json({message: "please choose 1 or more categories"});
+        }
+
+        const userId = req.user._id;
+        await User.findByIdAndUpdate(userId, {
+            'preferences.categories': categories
+        });
+
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully saved user preferences",
+            categories: categories
+        });
+
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            status: "error",
+            message: "error storing user preference"
+        });
+    }
+}
+
+exports.userFeed = async(req, res) => {
+    try{
+        const { page = 1, limit = 20 } = req.query;
+
+        const pageNumber = parseInt(page, 10);
+        const pageSize = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * pageSize;
+
+
+        const categories = req.user.preferences.categories;
+        // let products = await Product.aggregate([
+        //     { $match: { category: { $in: categories } } },  
+        //     { $sample: { size: pageSize } },  
+        //     { $skip: skip }  
+        // ]);
+        let products = await Product.find({ category: { $in: categories } });
+        products = products.sort(() => Math.random() - 0.5); // Shuffle array
+        products = products.slice(skip, skip + pageSize);
+
+        if (products.length < pageSize) {
+            // Fill remaining space with random products 
+            const remainingSpace = pageSize - products.length;
+            
+            const randomProducts = await Product.aggregate([
+                { $match: { category: { $nin: categories } } },
+                { $sample: { size: remainingSpace } }  
+            ]);
+            products = products.concat(randomProducts); 
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully fetched personalized feed",
+            length: products.length,
+            products: products
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            status: "error",
+            message: "error fetching user feed"
+        });
+    }
+}
