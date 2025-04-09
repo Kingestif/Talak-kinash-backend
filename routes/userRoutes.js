@@ -5,7 +5,7 @@ const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotific
 const {protect, verify, isUser} = require('../controllers/authController');
 const similarUpload = require('../middlewares/similarImage');
 
-router.route('/profile').get(protect, isUser, getUserProfile).patch(protect, isUser, updateUserProfile);
+router.route('/profile').get(protect, getUserProfile).patch(protect, isUser, updateUserProfile);
 router.route('/search').get(protect, isUser, searchProduct).post(protect, isUser, scanBarcode);
 router.route('/notifications').get(protect, isUser, getNotification);
 router.route('/wishlist').get(protect, isUser, getFromWishlist);
@@ -16,6 +16,7 @@ router.route('/filterCategory').get(protect, isUser, filterByCategory);
 router.route('/similarImage').post(protect, isUser, similarUpload.single('image'), findSimilarImages);
 router.route('/homepage').get(protect, isUser, userFeed);
 router.route('/category').post(protect, isUser, storeCategory);
+router.route('/compare/:id').get(protect, isUser, getSimilarProducts);
 
 module.exports =  router;
     
