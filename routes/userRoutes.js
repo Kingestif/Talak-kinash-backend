@@ -16,7 +16,7 @@ router.route('/filterCategory').get(protect, isUser, filterByCategory);
 router.route('/similarImage').post(protect, isUser, similarUpload.single('image'), findSimilarImages);
 router.route('/homepage').get(protect, isUser, userFeed);
 router.route('/category').post(protect, isUser, storeCategory);
-router.route('/compare/:id').get(protect, isUser, getSimilarProducts);
+router.route('/compare/:id').get(protect, isUser);
 
 module.exports =  router;
     
