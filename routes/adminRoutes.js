@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {viewAdminProfile, viewUserProfile, viewAllUsers, viewAllSellers, viewAllProducts, pendingSellers, approveSeller, updateSubscriptionPrice, updatePromotionPrice, addPromotionPlan, getPromotionPlans, deletePromotionPlan} = require('../controllers/adminController');
-const {protect, verify, isAdmin} = require('../controllers/authController');
+const {protect, verify, isAdmin} = require('../middlewares/userVerification');
 
 router.route('/me').get(protect, isAdmin, viewAdminProfile);
 router.route('/userprofile/:id').get(protect, isAdmin, viewUserProfile);

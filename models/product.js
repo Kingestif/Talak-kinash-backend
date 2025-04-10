@@ -34,11 +34,6 @@ const ProductSchema = new mongoose.Schema({
         ref: 'User',  
         required: [true, 'Product must have a seller'],
     },
-    
-    // isVerfied: {
-    //     type: Boolean,
-    //     default: false, 
-    // },
 
     isFeatured: {
         type: Boolean,

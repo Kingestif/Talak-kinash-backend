@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts} = require('../controllers/userController');
-const {protect, verify, isUser} = require('../controllers/authController');
+const {protect, verify, isUser} = require('../middlewares/userVerification');
 const similarUpload = require('../middlewares/similarImage');
 
 router.route('/profile').get(protect, getUserProfile).patch(protect, isUser, updateUserProfile);
