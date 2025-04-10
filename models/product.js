@@ -56,6 +56,10 @@ const ProductSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
+ProductSchema.index({ category: 1 });
+ProductSchema.index({ tag: 1 });
+ProductSchema.index({ price: 1 });
+
 
 //mock data
 // const { faker } = require("@faker-js/faker");
@@ -92,7 +96,7 @@ const ProductSchema = new mongoose.Schema({
 
 // const fakeProduct = Array.from({ length: 200 }, createRandomProduct); 
 
-ProductSchema.index({ name: 'text', description: 'text', tag: 'text' }, { weights: {name: 10, description: 5, tags: 2}});
+ProductSchema.index({ name: 'text', description: 'text', tag: 'text', category: 'text' }, { weights: {name: 10, description: 5, tag: 2, category: 2}});
 
 const Product = mongoose.model('Product', ProductSchema); 
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed} = require('../controllers/userController');
+const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts} = require('../controllers/userController');
 const {protect, verify, isUser} = require('../controllers/authController');
 const similarUpload = require('../middlewares/similarImage');
 
@@ -16,7 +16,7 @@ router.route('/filterCategory').get(protect, isUser, filterByCategory);
 router.route('/similarImage').post(protect, isUser, similarUpload.single('image'), findSimilarImages);
 router.route('/homepage').get(protect, isUser, userFeed);
 router.route('/category').post(protect, isUser, storeCategory);
-router.route('/compare/:id').get(protect, isUser);
+router.route('/compare/:id').get(protect, isUser, getSimilarProducts);
 
 module.exports =  router;
     

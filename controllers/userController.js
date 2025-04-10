@@ -1,5 +1,6 @@
 const User = require('../models/users');
 const Product = require('../models/product'); 
+const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2; 
 const axios = require('axios'); 
 require('dotenv').config();
@@ -382,11 +383,6 @@ exports.userFeed = async(req, res) => {
 
 
         const categories = req.user.preferences.categories;
-        // let products = await Product.aggregate([
-        //     { $match: { category: { $in: categories } } },  
-        //     { $sample: { size: pageSize } },  
-        //     { $skip: skip }  
-        // ]);
         let products = await Product.find({ category: { $in: categories } });
         products = products.sort(() => Math.random() - 0.5); // Shuffle array
         products = products.slice(skip, skip + pageSize);
@@ -416,3 +412,50 @@ exports.userFeed = async(req, res) => {
         });
     }
 }
+
+function cosineSimilarity(a, b) {
+    const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
+    const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+    const magB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+    return dot / (magA * magB);
+}
+  
+exports.getSimilarProducts = async (req, res) => {
+    try {
+        const productId = req.params.id;
+  
+        const clickedProduct = await Product.findById(productId);
+        if (!clickedProduct || !clickedProduct.images[0]?.embedding) {
+            return res.status(404).json({ error: 'Product or embedding not found' });
+        }
+    
+        const clickedEmbedding = clickedProduct.images[0].embedding;
+    
+        const candidates = await Product.find({
+            _id: { $ne: productId },
+            'images.0.embedding': { $exists: true }
+        });
+    
+        const ranked = candidates.map(product => {
+            const embedding = product.images[0].embedding;
+            const similarity = cosineSimilarity(clickedEmbedding, embedding);
+            return { product, similarity };
+        });
+    
+        ranked.sort((a, b) => b.similarity - a.similarity);
+    
+        const topSimilar = ranked.slice(0, 10).map(item => ({
+            ...item.product.toObject(),
+            similarity: item.similarity
+        }));
+    
+        res.status(200).json({
+            length: topSimilar.length,
+            products: topSimilar
+        });
+
+    } catch (error) {
+        console.error('Error fetching similar products:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
