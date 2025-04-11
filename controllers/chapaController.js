@@ -13,10 +13,14 @@ const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);
 exports.initializePayment = async (req, res) => {
     try {
       const seller = req.user;
-      const previousPayment = await SellerPayment.findOne({sellerId: seller._id});
 
-      console.log("PREV",previousPayment);
-      if (previousPayment && previousPayment.status === "success"){
+      const previousPayment = await SellerPayment.findOne({    //check recent transaction user made is not success or have expired
+        sellerId: seller._id,
+        status: "success",
+        expiresAt: { $gt: new Date() }
+      }).sort({createdAt: -1}); 
+
+      if (previousPayment){
         return res.status(400).json({message: "You already have an active subscription. Please wait until it expires before starting a new one."});
       }
 
@@ -27,6 +31,7 @@ exports.initializePayment = async (req, res) => {
       }
 
       const subscription = await SubscriptionPlan.findOne({type: subscriptionType});
+      const duration = subscription.duration;
       const amount = subscription.price;
       const tx_ref = `subscription_${Date.now()}_${seller._id}`;
 
@@ -53,6 +58,7 @@ exports.initializePayment = async (req, res) => {
           subscriptionPlan: subscriptionType,
           amount: amount,
           currency: currency,
+          expiresAt: new Date(Date.now() + duration * 24 * 60 * 60 * 1000),
           status: "pending"
         });
 

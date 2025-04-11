@@ -37,6 +37,11 @@ const SellerPaymentSchema = new mongoose.Schema({
         enum: ["pending", "success", "failed", "cancelled", "refunded"],
         default: "pending"
     },
+
+    expiresAt: {
+        type: Date,
+        required: true
+    }
 },
     { timestamps: true }
 );

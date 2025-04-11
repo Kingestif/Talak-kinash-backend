@@ -10,9 +10,6 @@ mongoose.connect(process.env.DATABASE).then(()=>{
     console.log('Database connection error', err);
 });
 
-removeExpiredFeaturedProducts();
-setInterval(removeExpiredFeaturedProducts, 24 * 60 * 60 * 1000);
-
 const port = process.env.PORT;
 app.listen(port, ()=>{
     console.log(`Server started running on port ${port}`);

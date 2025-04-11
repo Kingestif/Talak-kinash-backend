@@ -3,12 +3,16 @@ const SellerPayment = require('../models/sellerPayment');
 exports.sellerPaymentVerified = async(req, res, next) => {
   try{
     const sellerId = req.user._id;
-    const payment = await SellerPayment.findOne({sellerId: sellerId}).sort({createdAt: -1});  //get recent transaction user made
+    const payment = await SellerPayment.findOne({    //check recent transaction user made is success and not expired
+      sellerId: sellerId,
+      status: "success",
+      expiresAt: { $gt: new Date() }
+    }).sort({createdAt: -1}); 
 
-    if(!payment || payment.status !== "success"){
+    if(!payment){
       return res.status(404).json({
         status: "error",
-        message: "Please Subscribe to do this operation"
+        message: "Your subscription has expired or not found"
       });
     }
     next();
@@ -17,6 +21,6 @@ exports.sellerPaymentVerified = async(req, res, next) => {
     return res.status(500).json({
       status: "error",
       message: "Can not verify subscription"
-    })
+    });
   }
 }

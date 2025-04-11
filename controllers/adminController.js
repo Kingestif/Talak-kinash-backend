@@ -166,7 +166,8 @@ exports.updateSubscriptionPrice = async(req, res) => {
 
 exports.addPromotionPlan = async(req, res) => {
     try{
-        const {type, price, duration} = req.body;
+        let {type, price, duration} = req.body;
+        duration = duration * 24 * 60 * 60 * 1000
         const newPlan = await Promotion.create({type, price, duration});
 
         return res.status(200).json({
@@ -201,9 +202,13 @@ exports.getPromotionPlans = async(req, res) => {
 exports.updatePromotionPrice = async(req, res) => {
     try{
         const promotionId = req.params.id; 
-        const updatedata = req.body;
+        const updatedData = req.body;
+
+        if (updatedData.duration) {
+            updatedData.duration = updatedData.duration * 24 * 60 * 60 * 1000
+        }
         const promotion = await Promotion.findByIdAndUpdate(promotionId,
-            updatedata,
+            updatedData,
             {new: true, runValidators: true}
         );
 

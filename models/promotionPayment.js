@@ -20,7 +20,6 @@ const promotionPaymentSchema = new mongoose.Schema({
 
     promotionPlan: {
         type: String,
-        enum: ["ShortBoost", "HalfDay", "FullDay"],
     },
 
     amount: {
