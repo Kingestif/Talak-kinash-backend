@@ -8,6 +8,8 @@ const PromotePayment = require('../models/promotionPayment');
 const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);
 const cloudinary = require('cloudinary').v2; 
 const axios = require('axios'); 
+const SellerPayment = require('../models/sellerPayment');
+const SubscriptionPlan = require('../models/subscriptionSchema');
 
 exports.postProduct = async(req, res) => {
     try{
@@ -212,3 +214,41 @@ exports.initializeFeaturePayment = async (req, res) => {
       res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+
+exports.isSellerSubscribed = async(req, res) => {
+    try{
+        const sellerId = req.user._id;
+
+        const payment = await SellerPayment.findOne({
+            sellerId: sellerId,
+            status: "success",
+            expiresAt: { $gt: new Date() }
+        }).sort({createdAt: -1}); 
+
+        if(payment){
+            return res.status(200).json({isSubscribed: true});
+        }
+
+        return res.status(200).json({isSubscribed: false});
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error ",
+            message: error.message
+        });
+    }
+}
+
+exports.fetchSubPlans = async(req, res) => {
+    try{
+        const plans = await SubscriptionPlan.find();
+        return res.status(200).json({plans});
+        
+    }catch(error){
+        return res.status(500).json({
+            status: "error ",
+            message: error.message
+        });
+    }
+}
+

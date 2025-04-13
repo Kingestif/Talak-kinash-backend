@@ -7,14 +7,20 @@ dotenv.config({path: '.env'});
 
 mongoose.connect(process.env.DATABASE).then(()=>{
     console.log('mongoose connected');
+
+    swaggerDocs(app);
+
+    const port = process.env.PORT;
+    app.listen(port, ()=>{
+        console.log(`Server started running on port ${port}`);
+    });
+
+    removeExpiredFeaturedProducts();
+    setInterval(removeExpiredFeaturedProducts, 60 * 60 * 1000);
+
 }).catch((err)=>{
     console.log('Database connection error', err);
 });
 
-swaggerDocs(app);
 
 
-const port = process.env.PORT;
-app.listen(port, ()=>{
-    console.log(`Server started running on port ${port}`);
-});

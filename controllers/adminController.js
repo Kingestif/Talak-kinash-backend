@@ -20,7 +20,7 @@ exports.viewAdminProfile = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch user profile"
         }); 
@@ -37,7 +37,7 @@ exports.viewUserProfile = async(req, res) => {
             data: user
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch the user"
         });
@@ -56,7 +56,7 @@ exports.viewAllUsers = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch all users"
         });
@@ -73,7 +73,7 @@ exports.viewAllSellers = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch all sellers"
         });
@@ -91,9 +91,9 @@ exports.viewAllProducts = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
-            message: "Failed to fetched all products"
+            message: "Failed to fetch all products"
         });
     }
 }
@@ -109,7 +109,7 @@ exports.pendingSellers = async(req, res) => {
             } 
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch pending sellers"
         });
@@ -136,7 +136,7 @@ exports.approveSeller = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to approve the seller"
         })
@@ -157,7 +157,7 @@ exports.updateSubscriptionPrice = async(req, res) => {
             data: plan
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "failed to update subscription plan"
         });
@@ -175,7 +175,7 @@ exports.addPromotionPlan = async(req, res) => {
             message: "Successfully added promotion plan"
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: error.message
         });
@@ -192,7 +192,7 @@ exports.getPromotionPlans = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: error.message
         });
@@ -219,7 +219,7 @@ exports.updatePromotionPrice = async(req, res) => {
         });
  
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "failed to update promotion plan"
         });
@@ -237,7 +237,7 @@ exports.deletePromotionPlan = async(req, res) => {
         });
  
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "failed to delete promotion plan"
         });
