@@ -22,6 +22,10 @@ jobs:
       run: |
         npm install   
 
+    - name: Test SSH connection
+      run: |
+        ssh -i "${{ secrets.EC2_SSH_KEY }}" -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} echo "SSH connection successful"
+
     - name: SSH to EC2 and deploy
       run: |
         ssh -i "${{ secrets.EC2_SSH_KEY }}" -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
