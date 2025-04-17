@@ -33,9 +33,12 @@ jobs:
         echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > key.pem
         chmod 600 key.pem
         ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          source ~/.bashrc
-          cd /home/ubuntu/Talak-kinash-backend   
-          git pull origin main       
-          npm install                
-          pm2 restart talak-kinash-backend 
+          source ~/.bashrc  # Ensure environment variables are loaded
+          export NVM_DIR="$HOME/.nvm"  # Explicitly set NVM_DIR for nvm usage
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load nvm
+          nvm use 20.18.0  # Ensure the correct Node.js version is used
+          cd /home/ubuntu/Talak-kinash-backend
+          git pull origin main
+          npm install
+          pm2 restart talak-kinash-backend
         EOF
