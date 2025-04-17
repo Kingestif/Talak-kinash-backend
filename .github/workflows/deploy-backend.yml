@@ -16,11 +16,18 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2   
       with:
-        node-version: '20.18.0'  
+        node-version: '20.18.0'
+
+    - name: Verify Node.js and npm are available
+      run: |
+        node -v
+        npm -v
+
+    - name: Install pm2
+      run: npm install -g pm2
 
     - name: Install dependencies
-      run: |
-        npm install   
+      run: npm install   
 
     - name: Test SSH connection
       run: |
