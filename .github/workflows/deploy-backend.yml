@@ -16,18 +16,11 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2   
       with:
-        node-version: '20.18.0'
-
-    - name: Verify Node.js and npm are available
-      run: |
-        node -v
-        npm -v
-
-    - name: Install pm2
-      run: npm install -g pm2
+        node-version: '20.18.0'  
 
     - name: Install dependencies
-      run: npm install   
+      run: |
+        npm install   
 
     - name: Test SSH connection
       run: |
@@ -40,6 +33,7 @@ jobs:
         echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > key.pem
         chmod 600 key.pem
         ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          source ~/.bashrc
           cd /home/ubuntu/Talak-kinash-backend   
           git pull origin main       
           npm install                
