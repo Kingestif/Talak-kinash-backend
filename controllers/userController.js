@@ -20,7 +20,7 @@ exports.getUserProfile = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch user info"
         });
@@ -45,7 +45,7 @@ exports.updateUserProfile = async(req, res) => {
             }
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to update user info",
         });
@@ -59,7 +59,7 @@ exports.scanBarcode = async(req, res) => {
             message: "Found Similar Products",
         });
     }catch(error){
-        res.status(400).json({
+        res.status(500).json({
             status: "error",
             message: "No similar product found"
         });
@@ -73,7 +73,7 @@ exports.getNotification = async(req, res) =>{
             message: "Notifications fetched successfully",
         });
     }catch(error){
-        res.status(400).json({
+        res.status(500).json({
             status: "error",
             message: "Error fetching notifications"
         });
@@ -104,7 +104,7 @@ exports.addToWishlist = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Error adding product to wishlist",
             error: error.message
@@ -126,7 +126,7 @@ exports.getFromWishlist = async(req, res) => {
         });
 
     }catch(error){
-        return res.status().json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to fetch from wishlist"
         });
@@ -149,7 +149,7 @@ exports.removeFromWishlist = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Error removing product from wishlist"
         });
@@ -225,7 +225,7 @@ exports.filterByCategory = async(req, res) => {
         });
 
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: `Failed to fetch ${category} products`,
         });
@@ -275,7 +275,7 @@ exports.searchProduct = async(req, res) => {
 
     }catch(error){
         console.log(error.message);
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to find product"
         });

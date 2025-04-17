@@ -101,7 +101,7 @@ exports.updateProduct = async(req, res) => {
         });
     }catch(error){
         console.log(error.message);
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to update product"
         });
@@ -121,7 +121,7 @@ exports.deleteProduct = async(req, res) => {
             message: "Product deleted successfully"
         });
     }catch(error){
-        return res.status(400).json({
+        return res.status(500).json({
             status: "error",
             message: "Failed to delete product"
         });
@@ -140,7 +140,7 @@ exports.getAllProducts = async(req, res) => {
         });
         
     }catch(error){
-        res.status(400).json({
+        res.status(500).json({
             status: "error",
             message: "Failed to fetch sellers products"
         });
@@ -252,3 +252,15 @@ exports.fetchSubPlans = async(req, res) => {
     }
 }
 
+exports.fetchPromoPlans = async(req, res) => {
+    try{
+        const plans = await Promotion.find();
+        return res.status(200).json({plans});
+        
+    }catch(error){
+        return res.status(500).json({
+            status: "error ",
+            message: error.message
+        });
+    }
+}
