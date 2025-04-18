@@ -28,7 +28,7 @@ const options = {
 
         servers: [
             {
-                url: "http://127.0.0.1:3000",  
+                url: "https://talakkinash.duckdns.org",  
                 description: "Deployed Server",
             },
         ],
@@ -40,7 +40,7 @@ const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app) => {
     app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-    console.log("Swagger Docs available at http://127.0.0.1:3000/api-docs");
+    console.log("Swagger Docs available at https://talakkinash.duckdns.org/api-docs");
 };
 
 module.exports = swaggerDocs; 
