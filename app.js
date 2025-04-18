@@ -29,8 +29,6 @@ app.get("/", (req, res) => {
     res.send(" Service  Is  Running");
 });
 
-console.log("CI/CD is working");
-
 app.use((err, req, res, next) => {
     console.error(err.stack);  
 
