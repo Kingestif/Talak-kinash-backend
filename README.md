@@ -38,33 +38,33 @@ cd Talak-kinash-backend
 npm install
 ```
 
-### Setup Environment Variables
+## Setup Environment Variables
 Create a `.env` file and add the following:
 
-# Server Configuration
+### Server Configuration
 PORT=5000
 
-# Database Configuration
+### Database Configuration
 DATABASE=your_mongo_db_connection_string
 DATABASE_USERNAME=your_database_username
 DATABASE_PASSWORD=your_database_password
 
-# Authentication & JWT
+### Authentication & JWT
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRATION=your_jwt_expiration_time
 
-# AI Services
+### AI Services
 CLIPAI_BASE_URL=https://your-clip-api-url
 
-# Cloudinary (for image uploads)
+### Cloudinary (for image uploads)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
-# Payment Integration (Chapa)
+### Payment Integration (Chapa)
 CHAPA_SECRET_KEY=your_chapa_secret_key
 
-# Environment-specific Config
+### Environment-specific Config
 NODE_ENV=development # or production
 
 
