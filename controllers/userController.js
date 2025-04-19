@@ -464,7 +464,7 @@ exports.forgotPassword = async(req, res) => {
     try{
         return res.status(200).json({
             status: "success",
-            message: "Successfuly updated user password",
+            message: "Successfuly changed user password",
         });
 
     }catch(error){
