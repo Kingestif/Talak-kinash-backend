@@ -1,44 +1,54 @@
-name: Deploy Backend to EC2
+name: Deploy Dockerized Backend to EC2
 
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest   
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2   
+      uses: actions/checkout@v2
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2   
-      with:
-        node-version: '20.18.0'  
-
-    - name: Install dependencies
-      run: |
-        npm install   
+    - name: Extract short commit SHA
+      id: vars
+      run: echo "SHA_TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Test SSH connection
       run: |
         echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > key.pem
         chmod 600 key.pem
-        ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} echo "SSH connection successful"
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} "echo 'SSH connection successful'"
 
-    - name: SSH to EC2 and deploy
+    - name: SSH into EC2 and deploy Docker container
       run: |
         echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > key.pem
         chmod 600 key.pem
-        ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          source ~/.bashrc  
-          export NVM_DIR="$HOME/.nvm"  
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load nvm
-          nvm use 20.18.0  
-          cd /home/ubuntu/Talak-kinash-backend
+
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
+          set -e
+
+          echo "Changing directory..."
+          cd ~/Talak-kinash-backend
+
+          echo "Pulling latest code..."
           git pull origin main
-          npm install
-          pm2 restart talak-kinash-backend
+
+          echo "Stopping old container..."
+          docker stop talak-container || true
+          docker rm talak-container || true
+
+          echo "🐳 Building Docker image with tag: $SHA_TAG"
+          docker build -t talak-backend:$SHA_TAG .
+
+          echo "Pruning unused images more that 7 days..."
+          docker image prune -a --filter "until=168h" -f
+
+          echo "Running new container..."
+          docker run -d --env-file .env -p 3000:3000 --restart always --name talak-container talak-backend:$SHA_TAG
         EOF
+      env:
+        SHA_TAG: ${{ env.SHA_TAG }}

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts} = require('../controllers/userController');
+const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts, forgotPassword} = require('../controllers/userController');
 const {protect, verify, isUser} = require('../middlewares/userVerification');
 const similarUpload = require('../middlewares/similarImage');
 
@@ -591,6 +591,8 @@ router.route('/category').post(protect, isUser, storeCategory);
  *         description: Server error while fetching similar products
  */
 router.route('/compare/:id').get(protect, isUser, getSimilarProducts);
+
+router.route('/forgotPassword').get(protect, verify, isUser, forgotPassword);
 
 module.exports =  router;
     

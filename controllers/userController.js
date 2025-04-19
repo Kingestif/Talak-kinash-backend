@@ -459,3 +459,18 @@ exports.getSimilarProducts = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+exports.forgotPassword = async(req, res) => {
+    try{
+        return res.status(200).json({
+            status: "success",
+            message: "Successfuly updated user password",
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Error updating users password"
+        });
+    }
+};
