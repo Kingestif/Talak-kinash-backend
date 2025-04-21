@@ -14,6 +14,9 @@ services:
       - "3001:3000"  # note: host:container
     volumes:
       - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SERVER_ROOT_URL=https://talakkinash.duckdns.org/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
 
 volumes:
   grafana-storage:
