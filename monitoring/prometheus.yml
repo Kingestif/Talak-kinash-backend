@@ -2,6 +2,6 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'docker'
+  - job_name: "docker"
     static_configs:
-      - targets: ['localhost:9323']
+      - targets: ["10.227.121.119:9323"]
