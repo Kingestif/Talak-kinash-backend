@@ -106,26 +106,56 @@ router.route('/pending').get(protect, isAdmin, pendingSellers);
 
 /**
  * @swagger
- * /api/v1/admin/approve/{id}:
+ * /api/v1/admin/status/{id}:
  *   patch:
+ *     summary: Approve or decline a seller application
+ *     description: Admin endpoint to approve or reject a seller's registration. Sends an email notification to the seller based on the status.
  *     tags:
  *       - Admin
- *     summary: approve pending sellers
- *     description: Allows admin to approve pending seller
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
- *         description: ID of the user to update
  *         schema:
  *           type: string
- *     security:
- *       - bearerAuth: []
+ *         description: The unique ID of the seller (User ID)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approve, decline]
+ *                 description: Status to set for the seller
+ *               reason:
+ *                 type: string
+ *                 description: Required if the status is 'decline'
+ *                 example: Your documents are incomplete.
  *     responses:
  *       200:
- *         description: Successfully approved the seller
+ *         description: Seller status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Successfully updated sellers status
+ *       400:
+ *         description: Bad request (e.g., missing decline reason or invalid status)
+ *       404:
+ *         description: Seller not found
  *       500:
- *         description: Failed to approve the seller
+ *         description: Server error
  */
 router.route('/status/:id').patch(protect, isAdmin, approveSeller);
 

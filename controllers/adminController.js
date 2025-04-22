@@ -152,7 +152,7 @@ exports.approveSeller = async(req, res) => {
                 return res.status(400).json({ message: "Decline reason is required" });
             }
 
-            updateFields = {status: "declined"};
+            updateFields = { sellerVerified: false, status: "declined"};
             await sendEmail({
                 email: user.email,
                 subject: 'Your Seller Application Was Declined',

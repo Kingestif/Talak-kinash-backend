@@ -592,9 +592,94 @@ router.route('/category').post(protect, isUser, storeCategory);
  */
 router.route('/compare/:id').get(protect, isUser, getSimilarProducts);
 
+/**
+ * @swagger
+ * /api/v1/users/forgotPassword:
+ *   post:
+ *     summary: Request password reset
+ *     description: Sends a password reset email to the user if the email exists in the database.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *                 description: Registered email address of the user
+ *     responses:
+ *       200:
+ *         description: Password reset email sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Reset link is sent. please check your email
+ *       404:
+ *         description: Email not found in the system
+ *       500:
+ *         description: Server error or failed to send email
+ */
 router.route('/forgotPassword').post(forgotPassword);
 
-router.route('/reset-password/:token').get(resetPassword);
+/**
+ * @swagger
+ * /api/v1/users/reset-password/{token}:
+ *   post:
+ *     summary: Reset user password
+ *     description: Resets the user's password using a valid reset token sent to their email.
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The password reset token from the email link
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: newSecurePassword123
+ *                 description: The new password to set
+ *     responses:
+ *       200:
+ *         description: Password successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password successfully updated!
+ *       400:
+ *         description: Token is invalid or expired
+ *       500:
+ *         description: Server error
+ */
+router.route('/reset-password/:token').post(resetPassword);
 
 module.exports =  router;
     

@@ -81,7 +81,7 @@ API is documented using Swagger.
 ## Testing Locally
 
 ```bash
-npm run dev
+npm run 
 ```
 
 You can test APIs using tools like [Postman](https://www.postman.com/) or [Thunder Client](https://www.thunderclient.com/).
@@ -90,16 +90,20 @@ You can test APIs using tools like [Postman](https://www.postman.com/) or [Thund
 
 ## **Deployment**
 
-Our backend is continuously deployed to an AWS EC2 instance using **GitHub Actions** for seamless CI/CD.
+Our backend is continuously deployed to an AWS EC2 instance using GitHub Actions and Docker for a smooth and scalable CI/CD pipeline.
 
 ### How It Works
 - **Trigger:** On every push to the `main` branch
 - **CI/CD Tool:** GitHub Actions
+- **Deployment Strategy:** Docker-based
+
 
 ### 🛠 Deployment Steps
-1. Code is pulled from GitHub
-2. Dependencies are installed
-3. App is restarted using **PM2** on the EC2 server
+1. GitHub Actions triggers on push to main
+2. Code is pulled from GitHub onto the EC2 instance
+3. Docker image is built and tagged with the short commit SHA (e.g. talak-backend:abc1234)
+4. Old Docker containers are stopped and removed
+5. A new container is started using the latest image
 
 ### Secrets & Security
 - **SSH access** is securely handled using GitHub Actions secrets (`EC2_SSH_KEY` & `EC2_PUBLIC_IP`)
@@ -109,8 +113,17 @@ Our backend is continuously deployed to an AWS EC2 instance using **GitHub Actio
 If needed, SSH into the EC2 instance and restart the app manually:
 
 ```bash
-pm2 restart talak-kinash-backend
+docker restart talak-container
 ```
+
+---
+
+## **Monitoring**
+
+Our backend container is monitored using Prometheus and Grafana, giving us real-time visibility into system performance and container-level metrics.
+
+- **Prometheus:** scrapes Docker metrics on port 9323
+- **Grafana:** provides a dashboard for real-time visualization 
 
 ---
 
