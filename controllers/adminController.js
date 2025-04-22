@@ -3,6 +3,7 @@ const SubscriptionPlan = require('../models/subscriptionSchema');
 const jwt = require('jsonwebtoken');
 const Product = require('../models/product');
 const Promotion = require('../models/promotion');
+const sendEmail = require('../utils/sendEmail');
 
 
 exports.viewAdminProfile = async(req, res) => {
@@ -100,13 +101,12 @@ exports.viewAllProducts = async(req, res) => {
 
 exports.pendingSellers = async(req, res) => {
     try{
-        const pendingSeller = await User.find({role: 'seller', sellerVerified: false});
+        const pendingSellers = await User.find({role: 'seller', status: 'pending'});
         return res.status(200).json({
             status: "success",
             message: "Pending sellers fetched successfully",
-            data: {
-                user: pendingSeller
-            } 
+            length: pendingSellers.length,
+            pendingSellers
         });
     }catch(error){
         return res.status(500).json({
@@ -119,11 +119,55 @@ exports.pendingSellers = async(req, res) => {
 
 exports.approveSeller = async(req, res) => {
     try{
+        const sellerId = req.params.id;
+        const status = req.body.status;
+        const declineReason = req.body.reason;
+        const user = await User.findById(sellerId);
+
+        if(!user){
+            return res.status(404).json({ message: "Seller not found!" });
+        }
+
+        if(!status){
+            return res.status(404).json({ message: "Status is required!" });
+        }
+
+        let updateFields = {};
+        if(status === "approve"){
+            updateFields = { sellerVerified: true, status: "approved" };
+            await sendEmail({
+                email: user.email,
+                subject: 'Your Seller Application Was Approved',
+                message: `
+                    <p>Hello ${user.name},</p>
+                    <p>We're happy to inform you that your application has been approved!</p>
+                    <p>You can now start listing products and manage your store.</p>
+                    <p>If you have any questions or need assistance, feel free to reach out to us.</p>
+                    <p>Welcome aboard!</p>
+                `,
+            });
+
+        }else if(status === "decline"){
+            if(!declineReason){
+                return res.status(400).json({ message: "Decline reason is required" });
+            }
+
+            updateFields = {status: "declined"};
+            await sendEmail({
+                email: user.email,
+                subject: 'Your Seller Application Was Declined',
+                message: `<p>Hello ${user.name},</p><p>We're sorry to inform you that your application was declined for the following reason:</p><blockquote>${declineReason}</blockquote>`,
+            });
+        }else{
+            return res.status(400).json({ message: "Unexpected Status inserted!!" });
+        }
+
         const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            { sellerVerified: true },
-            { new: true }
+            sellerId,
+            updateFields,  
+            { new: true }  
         );
+
 
         if (!updatedUser) {
             return res.status(404).json({ message: "Seller not found" });
@@ -131,15 +175,15 @@ exports.approveSeller = async(req, res) => {
 
         return res.status(200).json({
             status: "success",
-            message: "Successfully approved the seller",
+            message: "Successfully updated sellers status",
             user: updatedUser,
         });
 
     }catch(error){
         return res.status(500).json({
             status: "error",
-            message: "Failed to approve the seller"
-        })
+            message: "Failed to update sellers status"
+        });
     }
 }
 

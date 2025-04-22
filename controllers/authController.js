@@ -54,13 +54,18 @@ exports.signup = async(req,res,next)=>{
         
         const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get("host")}`;
         const verificationUrl = `${baseUrl}/api/v1/auth/confirmation-link/${verificationToken}`;
-        console.log(baseUrl);
+        const message = `
+            <p>Hello ${newuser.name},</p>
+            <p>Click the link below to verify your email:</p>
+            <a href="${verificationUrl}">${verificationUrl}</a>
+            <p>If you did not request this, please ignore this email.</p>
+        `;
 
         // Send email
         await sendEmail({
             email: newuser.email,
             subject: 'Verify your email',
-            message: `Click the link to verify your email: ${verificationUrl}` 
+            message
         });
 
         res.status(201).json({

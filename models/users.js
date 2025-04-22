@@ -100,8 +100,22 @@ const UserSchema = new mongoose.Schema({
         default: false
     },
 
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'declined'],
+        default: 'pending'
+    },
+
     verificationToken: {
         type: String
+    },
+
+    resetPasswordToken:{
+        type: String
+    },
+
+    resetPasswordExpires:{
+        type: Date
     },
 
     role: {

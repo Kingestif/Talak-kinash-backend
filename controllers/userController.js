@@ -3,6 +3,8 @@ const Product = require('../models/product');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2; 
 const axios = require('axios'); 
+const sendEmail = require('../utils/sendEmail');
+const crypto = require('crypto');
 require('dotenv').config();
 
 
@@ -462,15 +464,75 @@ exports.getSimilarProducts = async (req, res) => {
 
 exports.forgotPassword = async(req, res) => {
     try{
+        const email = req.body.email;
+        const user = await User.findOne({email: email});
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found!" });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const hash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+        user.resetPasswordToken = hash;
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        const resetURL = `https://talak-kinash.vercel.app/forgot-password/${resetToken}`
+        const message = `
+            <p>Hello ${user.name},</p>
+            <p>You requested to reset your password. Click the link below:</p>
+            <a href="${resetURL}">${resetURL}</a>
+            <p>This link will expire in 15 minutes.</p>
+        `;
+
+        await sendEmail({
+            email: user.email,
+            subject: 'Password reset request',
+            message
+        });
+
+
         return res.status(200).json({
             status: "success",
-            message: "Successfuly changed user password",
+            message: "Reset link is sent. please check your email"
         });
 
     }catch(error){
         return res.status(500).json({
             status: "error",
-            message: "Error updating users password"
+            message: error.message
+        });
+    }
+};
+
+exports.resetPassword = async(req, res) => {
+    try{
+        const resetToken = req.params.token;
+        const password = req.body.password;
+
+        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if(!user){
+            return res.status(400).json({ message: "Token is invalid or has expired" });
+        }
+
+        user.password = password;
+        
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        return res.status(200).json({ message: "Password successfully updated!" });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
         });
     }
 };

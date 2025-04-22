@@ -127,7 +127,7 @@ router.route('/pending').get(protect, isAdmin, pendingSellers);
  *       500:
  *         description: Failed to approve the seller
  */
-router.route('/approve/:id').patch(protect, isAdmin, approveSeller);
+router.route('/status/:id').patch(protect, isAdmin, approveSeller);
 
 /**
  * @swagger
