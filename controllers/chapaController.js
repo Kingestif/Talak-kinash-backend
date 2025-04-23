@@ -7,6 +7,7 @@ const SubscriptionPlan = require('../models/subscriptionSchema');
 const PromotePayment = require('../models/promotionPayment');
 const Product = require('../models/product');
 const Promotion = require('../models/promotion');
+const sendEmail = require('../utils/sendEmail');
 
 const chapa = new Chapa(process.env.CHAPA_SECRET_KEY);  
 
@@ -79,27 +80,49 @@ exports.initializePayment = async (req, res) => {
     }
 };
 
-exports.paymentVerification = async (req, res) => {
+exports.paymentVerification = async (req, res) => {   //Always respond with 200 OK after receiving this webhook to acknowledge that we have processed the event, even if it’s a failure. This prevents Chapa from continuously retrying.
   try{
-    console.log('Webhook received:', req.body);
+    console.log('Webhook received');
   
+    const rawBody = req.body.toString('utf8');
     const signature = req.headers['x-chapa-signature'];
     const secretKey = process.env.CHAPA_WEBHOOK_SECRET;
   
-    const hash = crypto.createHmac('sha256', secretKey).update(JSON.stringify(req.body)).digest('hex');
+    const hash = crypto.createHmac('sha256', secretKey).update(rawBody).digest('hex');
+    const data = JSON.parse(rawBody); // Parse manually 
+
+    console.log("DATA", data);
+
+
     if(signature !== hash){
       console.log('Signature verification failed');
-      return res.status(400).json({ message: 'Invalid signature' });
+      return res.status(200).json({ message: 'Invalid signature' });
     }
   
-    const event = req.body.event;
-    const userTx_ref = req.body.tx_ref;
+    const event = data.event;
+    const userTx_ref = data.tx_ref;
 
     if(event === "charge.success"){
       console.log("Payment success event received");
 
       if(userTx_ref.startsWith("subscription_")){
         console.log("SUBSCRIPTION PAID");
+        let paidPrice = parseInt(data.amount);
+        const plan = await SubscriptionPlan.findOne({price:paidPrice});
+        const subscriptionType = plan.type;
+
+        const message = `
+          <p>Congratulations! you have successfully subscribed to the <strong>${subscriptionType}</strong> plan.</p>
+          <p><strong>Amount Paid:</strong> ${data.amount} birr</p>
+          <br>
+          <p>Your subscription is now active. Enjoy all the benefits of your new plan!</p>
+        `;
+        await sendEmail({
+          email: data.email,
+          subject: `Subscription Confirmation - ${subscriptionType} Plan`,
+          message: message
+        });
+
         const sellerPayment = await SellerPayment.findOneAndUpdate(
           {tx_ref: userTx_ref},
           {$set: {status: "success"}},
@@ -107,13 +130,31 @@ exports.paymentVerification = async (req, res) => {
         );
   
         if (!sellerPayment) {
-          return res.status(404).json({ message: "Payment not found" });
+          return res.status(200).json({ message: "Payment not found" });
         }
     
         return res.status(200).json({ message: "Subscription Payment verified successfully"});
 
       }else if(userTx_ref.startsWith("promotion_")){
         console.log("PROMOTION PAID");
+        let paidPrice = parseInt(data.amount);
+        const plan = await Promotion.findOne({price:paidPrice});
+        const promotionType = plan.type;
+
+        console.log("PROMOTION Type", promotionType);
+
+
+        const message = `
+          <p>Congratulations! you have successfully Promoted your product.</p>
+          <p>Your Promotion is now active for <strong>${promotionType}</strong>. you can track your product status right from the app!! Enjoy your new plan!</p>
+        `;
+
+        await sendEmail({
+          email: data.email,
+          subject: `Promotion Confirmation`,
+          message: message
+        });
+
         const promotionPayment = await PromotePayment.findOneAndUpdate(
           {tx_ref: userTx_ref},
           {$set: {status: "success"}},
@@ -121,7 +162,7 @@ exports.paymentVerification = async (req, res) => {
         );
 
         if (!promotionPayment) {
-          return res.status(404).json({ message: "Payment not found" });
+          return res.status(200).json({ message: "Payment not found" });
         }
 
         const now = new Date();
@@ -137,16 +178,26 @@ exports.paymentVerification = async (req, res) => {
 
       }else {
         console.log("Unknown transaction type");
+        return res.status(200).json({ message: "Unknown transaction reference type" });
       }
 
       // ---------------------Other responses 
-    }else if(event === "charge.failed"){
+    }else if(event === "charge.failed/cancelled"){
       console.log("Payment failed event received");
+
+      const message = `
+        <p>We're sorry, but your attempt to subscribe to one of our plans was unsuccessful.</p>
+        <p>Please try again, or contact our support team if the issue persists.</p>
+        <p>We apologize for the inconvenience and appreciate your interest in our services.</p>
+      `;
+
+      await sendEmail({
+        email: data.email,
+        subject: `Subscription Failed`,
+        message: message
+      });
+
       return res.status(200).json({ message: "Payment failed"});
-  
-    }else if(event === "charge.cancelled"){
-      console.log("Payment cancelled event received");
-      return res.status(200).json({ message: "Payment cancelled"});
   
     }else if(event === "charge.refunded"){
       console.log("Payment refunded event received");
@@ -157,12 +208,12 @@ exports.paymentVerification = async (req, res) => {
       return res.status(200).json({ message: "Payment reversed"});
     }else {
       console.log("Unknown event received:", event);
-      return res.status(400).json({ message: "Unknown event" });
+      return res.status(200).json({ message: "Unknown event" });
     }
 
   }catch(error){
     console.error("Error updating payment status:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(200).json({ message: "Internal server error" });
   }
 }
 

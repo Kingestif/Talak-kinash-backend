@@ -7,17 +7,19 @@ const chapaRouter = require('./routes/chapaRoutes');
 const authRouter = require('./routes/authRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 app.use(cors());
 app.use(morgan('dev')); 
 
-// app.use((req,res,next)=>{
-//     req.requestTime = new Date().toISOString();
-//     next();
-// });
+// raw body parser 
+app.use('/api/v1/chapa/verify', bodyParser.raw({ type: 'application/json' }));
 
-
-app.use(express.json()); 
+//express.json for everything else (skip the chapa webhook)
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/v1/chapa/verify') return next();
+  express.json()(req, res, next);
+});
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/sellers', sellerRouter);

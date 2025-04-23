@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
+    "body-parser": "^2.2.0",
     "chapa": "^1.0.5",
     "chapa-nodejs": "^2.0.1",
     "cloudinary": "^1.21.0",
