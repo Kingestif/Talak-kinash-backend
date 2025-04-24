@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -8,6 +9,7 @@ const authRouter = require('./routes/authRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+
 
 app.use(cors());
 app.use(morgan('dev')); 

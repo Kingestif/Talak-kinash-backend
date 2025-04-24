@@ -111,6 +111,12 @@ exports.paymentVerification = async (req, res) => {   //Always respond with 200 
         const plan = await SubscriptionPlan.findOne({price:paidPrice});
         const subscriptionType = plan.type;
 
+        const sellerPayment = await SellerPayment.findOneAndUpdate(
+          {tx_ref: userTx_ref},
+          {$set: {status: "success"}},
+          {new: true}
+        );
+
         const message = `
           <p>Congratulations! you have successfully subscribed to the <strong>${subscriptionType}</strong> plan.</p>
           <p><strong>Amount Paid:</strong> ${data.amount} birr</p>
@@ -122,12 +128,6 @@ exports.paymentVerification = async (req, res) => {   //Always respond with 200 
           subject: `Subscription Confirmation - ${subscriptionType} Plan`,
           message: message
         });
-
-        const sellerPayment = await SellerPayment.findOneAndUpdate(
-          {tx_ref: userTx_ref},
-          {$set: {status: "success"}},
-          {new: true}
-        );
   
         if (!sellerPayment) {
           return res.status(200).json({ message: "Payment not found" });
@@ -143,6 +143,11 @@ exports.paymentVerification = async (req, res) => {   //Always respond with 200 
 
         console.log("PROMOTION Type", promotionType);
 
+        const promotionPayment = await PromotePayment.findOneAndUpdate(
+          {tx_ref: userTx_ref},
+          {$set: {status: "success"}},
+          {new: true, runValidators: true}
+        );
 
         const message = `
           <p>Congratulations! you have successfully Promoted your product.</p>
@@ -154,12 +159,6 @@ exports.paymentVerification = async (req, res) => {   //Always respond with 200 
           subject: `Promotion Confirmation`,
           message: message
         });
-
-        const promotionPayment = await PromotePayment.findOneAndUpdate(
-          {tx_ref: userTx_ref},
-          {$set: {status: "success"}},
-          {new: true, runValidators: true}
-        );
 
         if (!promotionPayment) {
           return res.status(200).json({ message: "Payment not found" });

@@ -478,7 +478,7 @@ exports.forgotPassword = async(req, res) => {
         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
         await user.save();
 
-        const resetURL = `https://talak-kinash.vercel.app/forgot-password/${resetToken}`
+        const resetURL = `${process.env.FRONTEND_BASE_URL}/forgot-password/${resetToken}`;
         const message = `
             <p>Hello ${user.name},</p>
             <p>You requested to reset your password. Click the link below:</p>
