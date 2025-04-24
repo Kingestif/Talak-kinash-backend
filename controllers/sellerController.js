@@ -13,7 +13,7 @@ const SubscriptionPlan = require('../models/subscriptionSchema');
 
 exports.postProduct = async(req, res) => {
     try{
-        const {name, description, price, category} = req.body;
+        const {name, description, price, category, productLink} = req.body;
 
         // ---product image
         let images = [];
@@ -63,7 +63,7 @@ exports.postProduct = async(req, res) => {
         
         const seller = req.user._id;
 
-        const newProduct = await Product.create({name, description, price, category, tag, images, seller});
+        const newProduct = await Product.create({name, description, price, category, tag, images, seller, productLink});
         // newProduct.images.forEach(image => {
         //     image.embedding = undefined;  
         // });

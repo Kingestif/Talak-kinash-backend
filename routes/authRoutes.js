@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {signup, login, verifyEmail, confirmLink} = require('../controllers/authController');
+const {signup, login, verifyEmail, confirmLink, refreshToken} = require('../controllers/authController');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
 /**
@@ -169,5 +169,7 @@ router.route('/confirmation-link/:token').get(confirmLink);
  *         description: Server error
  */
 router.route('/verify/:token').post(verifyEmail);
+
+router.route('/refresh-token').post(refreshToken);
 
 module.exports = router;  

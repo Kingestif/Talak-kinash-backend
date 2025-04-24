@@ -1,9 +1,8 @@
+require("dotenv").config();  
 const app = require('./app');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const removeExpiredFeaturedProducts = require("./utils/autoRemoveFeatures");
 const swaggerDocs = require("./swagger");
-dotenv.config({path: '.env'});
 
 mongoose.connect(process.env.DATABASE).then(()=>{
     console.log('mongoose connected');

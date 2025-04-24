@@ -43,6 +43,11 @@ const ProductSchema = new mongoose.Schema({
     featuredUntil: {
         type: Date,
         default: null
+    },
+
+    productLink: {
+        type: String,
+        required: [true, 'Product must have a redirection link']
     }
 
 

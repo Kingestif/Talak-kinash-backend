@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts, forgotPassword, resetPassword} = require('../controllers/userController');
+const {getUserProfile, updateUserProfile, searchProduct, scanBarcode, getNotification, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts, forgotPassword, resetPassword, logout, logoutAll} = require('../controllers/userController');
 const {protect, verify, isUser} = require('../middlewares/userVerification');
 const similarUpload = require('../middlewares/similarImage');
 
@@ -681,5 +681,7 @@ router.route('/forgotPassword').post(forgotPassword);
  */
 router.route('/reset-password/:token').post(resetPassword);
 
+router.route('/logout').post(logout);
+router.route('/logout-all').post(logoutAll);
 module.exports =  router;
     

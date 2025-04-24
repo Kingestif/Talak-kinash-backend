@@ -113,9 +113,22 @@ exports.login = async(req,res,next) =>{
             expiresIn: process.env.JWT_EXPIRE
         });
 
+        const refreshToken = jwt.sign({id: user._id}, process.env.REFRESH_SECRET, {
+            expiresIn: process.env.REFRESH_EXPIRE
+        });
+
+        user.refreshTokens.push({
+            token: refreshToken,
+            createdAt: new Date(),
+            device: req.headers['user-agent']
+        });
+
+        await user.save();
+
         res.status(200).json({
             status: "success",
             token: token,
+            refreshToken: refreshToken,
             role: user.role
         });
 
@@ -176,3 +189,38 @@ exports.verifyEmail = async (req, res) => {
         res.status(500).json({ status: 'error', message: err.message});
     }
 };
+
+exports.refreshToken = async(req, res) => {
+    try{
+        const {refreshToken} = req.body;
+        if (!refreshToken) return res.status(403).json({message: 'Refresh token required'});
+
+        const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_SECRET); 
+        if (!decoded)  return res.status(403).json({ message: 'Invalid refresh token' });
+
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const storedToken = user.refreshTokens.find(rt => rt.token === refreshToken);
+
+        if (!storedToken) {
+            return res.status(403).json({ message: 'Refresh token not found' });
+        }
+
+        const newAccessToken = jwt.sign({id: decoded.id}, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRE
+        });
+
+        return res.status(200).json({
+            status: 'success',
+            accessToken: newAccessToken
+        });
+      
+    }catch(error){
+        console.log(error.message)
+        return res.status(401).json({
+            status: "error",
+            message:"Couldn't generate access token"
+        });
+    }
+}

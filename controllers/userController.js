@@ -5,7 +5,8 @@ const cloudinary = require('cloudinary').v2;
 const axios = require('axios'); 
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
-require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const {promisify} = require('util');
 
 
 
@@ -522,6 +523,7 @@ exports.resetPassword = async(req, res) => {
         }
 
         user.password = password;
+        user.refreshTokens = []; // Invalidate all refresh tokens
         
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
@@ -536,3 +538,61 @@ exports.resetPassword = async(req, res) => {
         });
     }
 };
+
+exports.logout = async(req, res) => {
+    try{
+        const {refreshToken} = req.body;
+        if (!refreshToken) return res.status(403).json({message: 'Refresh token required'});
+
+        const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_SECRET);  
+        if (!decoded) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        } 
+        
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);        //just let users logout even if logged out before
+        await user.save();
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Logged out from current device',
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+}
+
+exports.logoutAll = async(req, res) => {
+    try{
+        const {refreshToken} = req.body;
+        if (!refreshToken) return res.status(403).json({message: 'Refresh token required'});
+
+        const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_SECRET);  
+
+        if (!decoded) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        } 
+
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        user.refreshTokens = []
+        await user.save();
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Logged out from all devices',
+        });
+
+    }catch(error){
+        console.log(error.message);
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+}

@@ -124,6 +124,14 @@ const UserSchema = new mongoose.Schema({
         default: 'user'
     },
 
+    refreshTokens: [
+        {
+            token: String,
+            createdAt: Date,
+            device: String 
+        }
+    ],
+
     recommendations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], 
 },
     { timestamps: true }
