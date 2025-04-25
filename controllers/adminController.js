@@ -7,12 +7,9 @@ const sendEmail = require('../utils/sendEmail');
 
 
 exports.viewAdminProfile = async(req, res) => {
-    
     try{
-        const token = req.headers.authorization.split(' ')[1];
-        const verified = jwt.verify(token, process.env.JWT_SECRET);
-        const userid = verified.id;
-        const user = await User.findById(userid);
+        const userId = req.user.id;
+        const user = await User.findById(userId);
 
         return res.status(200).json({
             status: "success",

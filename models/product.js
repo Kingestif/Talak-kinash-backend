@@ -26,7 +26,10 @@ const ProductSchema = new mongoose.Schema({
         url: String,
         tags: [String],
         public_id: String,     
-        embedding: [Number],
+        embedding: {
+            type: [Number],
+            select: false
+        }
     }],
     
     seller: {

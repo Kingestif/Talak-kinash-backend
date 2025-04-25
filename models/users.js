@@ -126,7 +126,10 @@ const UserSchema = new mongoose.Schema({
 
     refreshTokens: [
         {
-            token: String,
+            token: {
+                type: String,
+                select: false
+            },
             createdAt: Date,
             device: String 
         }
