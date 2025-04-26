@@ -84,6 +84,11 @@ const UserSchema = new mongoose.Schema({
         default: null,
     },
 
+    rewardPoints: {
+        type: Number,
+        default: 0
+    },
+
     identification: { type: String, required: function () { return this.role === "seller"; } },
 
     chapaApi: {

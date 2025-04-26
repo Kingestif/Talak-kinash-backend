@@ -13,7 +13,4 @@ const removeExpiredFeaturedProducts = async () => {
     }
 };
 
-// removeExpiredFeaturedProducts();
-// setInterval(removeExpiredFeaturedProducts, 60 * 60 * 1000);
-
 module.exports = removeExpiredFeaturedProducts;

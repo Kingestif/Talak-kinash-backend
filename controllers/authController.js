@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
+const generatePromoCode = require('../utils/generatePromoCode');
+const PromoCode = require('../models/promoCode');
 
 
 exports.signup = async(req,res,next)=>{
@@ -33,6 +35,52 @@ exports.signup = async(req,res,next)=>{
                 return res.status(400).json({ message: "Invalid referral code" });
             }
             referringUserId = referringUser._id; 
+            
+            //reward referring user
+            referringUser.rewardPoints += 100;
+
+            if(referringUser.rewardPoints === 1000){
+                const code = generatePromoCode();
+                const userId = referringUserId;
+
+                const newPromo = await PromoCode.create({code, userId});
+                await newPromo.save();
+
+                referringUser.rewardPoints = 0;
+
+                const message = `
+                    <p>Hello ${referringUser.name},</p>
+                    <p>Congratulations! 🎉 You've earned a special reward for referring users.</p>
+                    <p>Here’s your exclusive Promo Code: <strong>${code}</strong></p>
+                    <p><strong>How to use it:</strong> Apply this code during your next purchase to get a discount!</p>
+                    <p><strong>Important:</strong> This promo code is valid for <strong>24 hours</strong> from now. Make sure to use it before it expires!</p>
+                    <p>Thank you for helping Talak Kinash grow. Keep referring and keep winning!</p>
+                `;
+
+                await sendEmail({
+                    email: referringUser.email,
+                    subject: 'Your Exclusive Promo Code is Here!',
+                    message
+                });
+
+            }else{
+                const message = `
+                    <p>Hello ${referringUser.name},</p>
+                    <p>Great news! Someone you referred just signed up 🎉.</p>
+                    <p>As a thank you, you've earned <strong>100 Points</strong>!</p>
+                    <p>Once you collect <strong>1000 Points</strong>, you'll receive an exclusive <strong>Promo Code</strong> that gives you a discount on your next purchase!</p>
+                    <p>Keep referring more users to reach 1000 Points faster!!</p>
+                `;
+                
+                await sendEmail({
+                    email: referringUser.email,
+                    subject: 'Thank You for Referring a New User!',
+                    message
+                });
+            }
+
+            await referringUser.save();
+
         }
 
         //----------Birthdate
