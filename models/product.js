@@ -28,7 +28,6 @@ const ProductSchema = new mongoose.Schema({
         public_id: String,     
         embedding: {
             type: [Number],
-            select: false
         }
     }],
     
