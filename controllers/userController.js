@@ -436,7 +436,8 @@ exports.getSimilarProducts = async (req, res) => {
     
         const candidates = await Product.find({
             _id: { $ne: productId },
-            'images.0.embedding': { $exists: true }
+            'images.0.embedding': { $exists: true },
+            category: { $in: clickedProduct.category }  
         });
     
         const ranked = candidates.map(product => {
