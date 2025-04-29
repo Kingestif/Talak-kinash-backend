@@ -153,6 +153,12 @@ exports.initializeFeaturePayment = async (req, res) => {
       const productId = req.params.id;
 
       const product = await Product.findById(productId);
+      if(!product){
+        return res.status(404).json({
+            status: 'error',
+            message: 'Product not found'
+        });
+      }
       const previousPayment = product.isFeatured;
       
       if (previousPayment){
