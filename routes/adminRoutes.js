@@ -302,7 +302,7 @@ router.route('/createPromotion').post(protect, isAdmin, addPromotionPlan);
  *       500:
  *         description: Failed to fetch promotion plans
  */
-router.route('/getPromotion').get(protect, isAdmin, getPromotionPlans);
+router.route('/getPromotion').get(protect, getPromotionPlans);
 
 
 /**

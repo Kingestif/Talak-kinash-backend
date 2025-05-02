@@ -162,14 +162,17 @@ exports.removeFromWishlist = async(req, res) => {
 exports.getFeaturedProducts = async(req, res) => {
     try{
         const now = new Date();
+        const preference = req.user.preferences.categories;
+
 
         const products = await Product.find({
             isFeatured: true,
-            featuredUntil: {$gt: now}
-        }).sort({ featuredUntil: 1 });
+            category: {$in:preference}
+        }).sort({ featuredUntil: 1 }).select('-images.embedding');
 
         return res.status(200).json({
             status: "success",
+            length: products.length,
             message: "Successfuly fetched featured products",
             product: products
         });
