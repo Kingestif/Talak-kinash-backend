@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {signup, login, verifyEmail, confirmLink, refreshToken} = require('../controllers/authController');
 const uploadMiddleware = require('../middlewares/uploadMiddleware');
+const limiter = require('../middlewares/rate-limiter');
 
 /**
  * @swagger
@@ -113,7 +114,7 @@ router.route('/register').post(uploadMiddleware.single('identification'), signup
  *       500:
  *         description: Internal server error
  */
-router.route('/login').post(login);
+router.route('/login').post(limiter, login);
 
 /**
  * @swagger
