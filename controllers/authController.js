@@ -12,7 +12,7 @@ const PromoCode = require('../models/promoCode');
 exports.signup = async(req,res,next)=>{
     
     try{
-        const {name, email, phoneNumber, password, role, gender, birthday, referredBy, shopName, storeLocation, storeLink, chapaApi} = req.body;
+        const {name, email, phoneNumber, password, role, gender, birthday, referredBy, shopName, latitude, longitude, storeLink, chapaApi} = req.body;
 
         // ----------Image
         let identification = null;
@@ -24,6 +24,15 @@ exports.signup = async(req,res,next)=>{
         if(storeLink){
             if (!validator.isURL(storeLink, { require_protocol: true })) {
                 return res.status(400).json({ message: "Invalid URL format. Please provide a valid URL with http or https." });
+            }
+        }
+
+        //----------Store location
+        let storeLocation = null;
+        if(latitude && longitude){
+            storeLocation = {
+                type: 'Point',
+                coordinates: [parseFloat(longitude), parseFloat(latitude)]
             }
         }
         

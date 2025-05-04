@@ -593,7 +593,60 @@ exports.logoutAll = async(req, res) => {
         });
 
     }catch(error){
-        console.log(error.message);
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+}
+
+exports.nearProducts = async(req, res) => {
+    try{
+        const { lat, lng, maxDistance = 10000, word } = req.query;
+
+        if (!lat || !lng) {
+            return res.status(400).json({ message: "Latitude and longitude are required" });
+        }
+
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lng);
+
+        const products = await Product.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: [lngNum, latNum]
+                    },
+                    distanceField: 'distance',
+                    spherical: true,
+                    // maxDistance: parseInt(maxDistance),
+                    key: 'productLocation' 
+                }
+            },
+
+            {$match: {
+                $or: [
+                    { title: { $regex: word, $options: 'i' } },
+                    { description: { $regex: word, $options: 'i' } }
+                ]
+            }},
+
+            { $sort: { distance: 1,} },
+
+            {
+                $project: {
+                    "images.embedding": 0
+                }
+            }
+        ]);
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully returned products based on proximity',
+            products
+        });
+    }catch(error){
         return res.status(500).json({
             status: "error",
             message: "Server error"

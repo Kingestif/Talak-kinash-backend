@@ -62,11 +62,10 @@ exports.postProduct = async(req, res) => {
         }
         
         const seller = req.user._id;
+        const sell = await User.findById(seller);
+        const productLocation = sell.storeLocation;
 
-        const newProduct = await Product.create({name, description, price, category, tag, images, seller, productLink});
-        // newProduct.images.forEach(image => {
-        //     image.embedding = undefined;  
-        // });
+        const newProduct = await Product.create({name, description, price, category, tag, images, seller, productLink, productLocation});
 
         await User.findByIdAndUpdate(newProduct.seller, {
             $push: {productsPosted: newProduct._id}
