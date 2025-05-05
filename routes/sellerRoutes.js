@@ -32,6 +32,9 @@ const productImageUpload = require('../middlewares/productImageMiddleware');
  *               category:
  *                 type: string
  *                 example: "Electronics"
+ *               productLink:
+ *                 type: string
+ *                 example: "jiji.com"
  *               images:
  *                 type: array
  *                 items:
@@ -77,7 +80,6 @@ router.route('/product').post(protect, verify, isSeller, sellerPaymentVerified, 
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Product'
  *       500:
  *         description: Failed to fetch seller's products
  */
@@ -308,6 +310,28 @@ router.route('/isSubscribed').get(protect, isSeller, isSellerSubscribed);
  */
 router.route('/fetchPlans').get(protect, fetchSubPlans);
 
+/**
+ * @swagger
+ * /api/v1/sellers/getPromotion:
+ *   get:
+ *     summary: Fetch all promotion plans
+ *     description: Retrieves a list of all promotion plans available in the system.
+ *     tags:
+ *       - Seller
+ *     responses:
+ *       200:
+ *         description: List of promotion plans successfully retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 plans:
+ *                   type: array
+ *                   items:
+ *       500:
+ *         description: Server error
+ */
 router.route('/getPromotion').get(protect, fetchPromoPlans);
 
 module.exports =  router; 

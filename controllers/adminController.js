@@ -80,7 +80,7 @@ exports.viewAllSellers = async(req, res) => {
 
 exports.viewAllProducts = async(req, res) => {
     try{
-        const products = await Product.find();
+        const products = await Product.find().select('-images.embedding');
 
         return res.status(200).json({
             status: "success",

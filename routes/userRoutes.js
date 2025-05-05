@@ -681,8 +681,183 @@ router.route('/forgotPassword').post(forgotPassword);
  */
 router.route('/reset-password/:token').post(resetPassword);
 
+/**
+ * @swagger
+ * /api/v1/users/logout:
+ *   post:
+ *     summary: Logout a user from the current device
+ *     description: Logs out the user from the current device by removing the provided refresh token.  
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token provided during login
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Successfully logged out from the current device
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Logged out from current device
+ *       403:
+ *         description: Invalid or missing refresh token
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.route('/logout').post(logout);
+
+/**
+ * @swagger
+ * /api/v1/users/logout-all:
+ *   post:
+ *     summary: Logout a user from all devices
+ *     description: Logs out the user from all devices by removing all refresh tokens associated with the user.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token provided during login
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Successfully logged out from all devices
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Logged out from all devices
+ *       403:
+ *         description: Invalid or missing refresh token
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.route('/logout-all').post(logoutAll);
+
+/**
+ * @swagger
+ * /api/v1/users/near-products:
+ *   get:
+ *     summary: Get products near a specific location
+ *     description: Retrieves a list of products that are located near the provided latitude and longitude.
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - name: lat
+ *         in: query
+ *         required: true
+ *         description: Latitude of the location
+ *         schema:
+ *           type: number
+ *           example: 8.7
+ *       - name: lng
+ *         in: query
+ *         required: true
+ *         description: Longitude of the location
+ *         schema:
+ *           type: number
+ *           example: 38.4
+ *       - name: maxDistance
+ *         in: query
+ *         required: false
+ *         description: Maximum distance from the location in meters. Default is 10000 meters (10 km).
+ *         schema:
+ *           type: number
+ *           example: 10000
+ *       - name: word
+ *         in: query
+ *         required: false
+ *         description: Search word to filter products by title or description
+ *         schema:
+ *           type: string
+ *           example: "laptop"
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved products near the specified location
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Successfully returned products based on proximity
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: Product ID
+ *                       title:
+ *                         type: string
+ *                         description: Product title
+ *                       description:
+ *                         type: string
+ *                         description: Product description
+ *                       price:
+ *                         type: number
+ *                         description: Product price
+ *                       productLocation:
+ *                         type: object
+ *                         properties:
+ *                           type:
+ *                             type: string
+ *                             example: Point
+ *                           coordinates:
+ *                             type: array
+ *                             items:
+ *                               type: number
+ *                             example: [38.4, 8.7]
+ *                       distance:
+ *                         type: number
+ *                         description: Distance from the provided location in meters
+ *                       images:
+ *                         type: object
+ *                         properties:
+ *                           embedding:
+ *                             type: string
+ *                             description: Image embedding (omitted in this response)
+ *       400:
+ *         description: Latitude and longitude are required
+ *       500:
+ *         description: Server error
+ */
 router.route('/near-products').get(protect, isUser, nearProducts);
 module.exports =  router;
     

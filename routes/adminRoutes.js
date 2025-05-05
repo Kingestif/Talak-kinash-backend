@@ -103,22 +103,21 @@ router.route('/sellers').get(protect, isAdmin, viewAllSellers);
  */
 router.route('/pending').get(protect, isAdmin, pendingSellers);
 
-
 /**
  * @swagger
  * /api/v1/admin/status/{id}:
  *   patch:
  *     summary: Approve or decline a seller application
- *     description: Admin endpoint to approve or reject a seller's registration. Sends an email notification to the seller based on the status.
+ *     description: Allows an admin to approve or decline a seller.  
  *     tags:
  *       - Admin
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID of the seller to approve or decline
  *         schema:
  *           type: string
- *         description: The unique ID of the seller (User ID)
  *     requestBody:
  *       required: true
  *       content:
@@ -131,14 +130,13 @@ router.route('/pending').get(protect, isAdmin, pendingSellers);
  *               status:
  *                 type: string
  *                 enum: [approve, decline]
- *                 description: Status to set for the seller
+ *                 description: Status to update the seller with
  *               reason:
  *                 type: string
- *                 description: Required if the status is 'decline'
- *                 example: Your documents are incomplete.
+ *                 description: Reason for declining the seller (required if status is 'decline')
  *     responses:
  *       200:
- *         description: Seller status updated successfully
+ *         description: Seller status successfully updated
  *         content:
  *           application/json:
  *             schema:
@@ -151,7 +149,7 @@ router.route('/pending').get(protect, isAdmin, pendingSellers);
  *                   type: string
  *                   example: Successfully updated sellers status
  *       400:
- *         description: Bad request (e.g., missing decline reason or invalid status)
+ *         description: Bad request due to missing or invalid inputs
  *       404:
  *         description: Seller not found
  *       500:
@@ -214,35 +212,51 @@ router.route('/updatePlan').patch(protect, isAdmin, updateSubscriptionPrice);
 
 /**
  * @swagger
- * /api/v1/admin/updatePlan:
+ * /api/v1/admin/updatePromotion/{id}:
  *   patch:
+ *     summary: Update a promotion plan
+ *     description: Allows an admin to update an existing promotion plan by ID.  
  *     tags:
  *       - Admin
- *     summary: Update subscription price
- *     description: Allows the admin to update the price of a subscription plan by type.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the promotion to update
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - type
- *               - price
  *             properties:
- *               type:
+ *               name:
  *                 type: string
- *                 example: "monthly"
+ *                 description: Name of the promotion
  *               price:
  *                 type: number
- *                 example: 199.99
- *     security:
- *       - bearerAuth: []
+ *                 description: Price of the promotion
+ *               duration:
+ *                 type: number
+ *                 description: Duration of the promotion in days (converted to milliseconds internally)
  *     responses:
  *       200:
- *         description: Subscription plan updated successfully
+ *         description: Promotion updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Promotion plan updated successfuly
  *       500:
- *         description: Failed to update subscription plan
+ *         description: Server error
  */
 router.route('/updatePromotion/:id').patch(protect, isAdmin, updatePromotionPrice);
 

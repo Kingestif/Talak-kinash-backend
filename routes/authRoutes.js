@@ -38,6 +38,7 @@ const limiter = require('../middlewares/rate-limiter');
  *               gender:
  *                 type: string
  *                 example: male
+ *                 nullable: true
  *               birthday:
  *                 type: string
  *                 format: date
@@ -48,9 +49,14 @@ const limiter = require('../middlewares/rate-limiter');
  *               shopName:
  *                 type: string
  *                 example: John's Electronics
- *               storeLocation:
- *                 type: string
- *                 example: Addis Ababa, Bole
+ *               latitude:
+ *                 type: number
+ *                 format: float
+ *                 example: 9.03
+ *               longitude:
+ *                 type: number
+ *                 format: float
+ *                 example: 38.74
  *               storeLink:
  *                 type: string
  *                 example: https://johnstore.com
@@ -77,7 +83,7 @@ router.route('/register').post(uploadMiddleware.single('identification'), signup
  *     tags:
  *       - Authentication
  *     summary: Log in a user
- *     description: Authenticates a user with email and password and returns a JWT token.
+ *     description: Authenticates a user with email and password and returns a JWT token and refresh token.
  *     requestBody:
  *       required: true
  *       content:
@@ -104,6 +110,9 @@ router.route('/register').post(uploadMiddleware.single('identification'), signup
  *                   type: string
  *                   example: success
  *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR...
+ *                 refreshToken:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR...
  *                 role:
