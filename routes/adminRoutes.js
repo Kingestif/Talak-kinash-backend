@@ -46,7 +46,7 @@ router.route('/me').get(protect, isAdmin, viewAdminProfile);
  *       500:
  *         description: Failed to fetch the user
  */
-router.route('/userprofile/:id').get(protect, isAdmin, viewUserProfile);
+router.route('/userprofile/:id').get(protect, viewUserProfile);
 
 /**
  * @swagger
