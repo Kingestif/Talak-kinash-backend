@@ -344,7 +344,6 @@ exports.findSimilarImages = async(req, res) => {
         }
 
     } catch (error) {
-        console.error("Error searching for similar images:", error);
         return res.status(500).json({
             status: "error",
             message: "Unable to find similar products",
