@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, searchProduct, addToWishlist, getFromWishlist, removeFromWishlist, getFeaturedProducts, filterByCategory, findSimilarImages, storeCategory, userFeed, getSimilarProducts, forgotPassword, resetPassword, logout, logoutAll, nearProducts} = require('../controllers/userController');
+const {getUserProfile, updateUserProfile, addToWishlist, getFromWishlist, removeFromWishlist, storeCategory} = require('../controllers/userController');
 const {protect, isUser} = require('../middlewares/userVerification');
 
 /**
