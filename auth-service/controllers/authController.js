@@ -280,3 +280,137 @@ exports.refreshToken = async(req, res) => {
         });
     }
 }
+
+
+exports.forgotPassword = async(req, res) => {
+    try{
+        const email = req.body.email;
+        const user = await User.findOne({email: email});
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found!" });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const hash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+        user.resetPasswordToken = hash;
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        const resetURL = `${process.env.FRONTEND_BASE_URL}/forgot-password/${resetToken}`;
+        const message = `
+            <p>Hello ${user.name},</p>
+            <p>You requested to reset your password. Click the link below:</p>
+            <a href="${resetURL}">${resetURL}</a>
+            <p>This link will expire in 15 minutes.</p>
+        `;
+
+        await sendEmail({
+            email: user.email,
+            subject: 'Password reset request',
+            message
+        });
+
+
+        return res.status(200).json({
+            status: "success",
+            message: "Reset link is sent. please check your email"
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+};
+
+exports.resetPassword = async(req, res) => {
+    try{
+        const resetToken = req.params.token;
+        const password = req.body.password;
+
+        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if(!user){
+            return res.status(400).json({ message: "Token is invalid or has expired" });
+        }
+
+        user.password = password;
+        user.refreshTokens = []; // Invalidate all refresh tokens
+        
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        return res.status(200).json({ message: "Password successfully updated!" });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+};
+
+exports.logout = async(req, res) => {
+    try{
+        const {refreshToken} = req.body;
+        if (!refreshToken) return res.status(403).json({message: 'Refresh token required'});
+
+        const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_SECRET);  
+        if (!decoded) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        } 
+        
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== refreshToken);        //just let users logout even if logged out before
+        await user.save();
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Logged out from current device',
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+}
+
+exports.logoutAll = async(req, res) => {
+    try{
+        const {refreshToken} = req.body;
+        if (!refreshToken) return res.status(403).json({message: 'Refresh token required'});
+
+        const decoded = await promisify(jwt.verify)(refreshToken, process.env.REFRESH_SECRET);  
+
+        if (!decoded) {
+            return res.status(403).json({ message: 'Invalid refresh token' });
+        } 
+
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        user.refreshTokens = []
+        await user.save();
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Logged out from all devices',
+        });
+
+    }catch(error){
+        return res.status(500).json({
+            status: "error",
+            message: "Server error"
+        });
+    }
+}
