@@ -148,7 +148,6 @@ const UserSchema = new mongoose.Schema({
         }
     ],
 
-    // recommendations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], 
 },
     { timestamps: true }
 );
