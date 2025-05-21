@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const {getUserProfile, updateUserProfile, addToWishlist, getFromWishlist, removeFromWishlist, storeCategory} = require('../controllers/userController');
-const {protect, isUser} = require('../middlewares/userVerification');
+const {getUserProfile, updateUserProfile, addToWishlist, getFromWishlist, removeFromWishlist, storeCategory, viewAdminProfile, viewUserProfile, viewAllUsers, viewAllSellers, pendingSellers, approveSeller} = require('../controllers/userController');
+const {protect, isUser, isAdmin} = require('../middlewares/userVerification');
 
 /**
  * @swagger
@@ -270,6 +270,159 @@ router.route('/wishlist/:productId').delete(protect, isUser, removeFromWishlist)
  *         description: Server error while storing preferences
  */
 router.route('/category').post(protect, isUser, storeCategory);
+
+
+/**
+ * @swagger
+ * /api/v1/users/admin:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get admin info
+ *     description: Returns the details of the authenticated admin.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Admin profile fetched successfully
+ *       500:
+ *         description: Failed to fetch Admin profile
+ */
+router.route('/admin').get(protect, isAdmin, viewAdminProfile);
+
+/**
+ * @swagger
+ * /api/v1/users:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get all users profile
+ *     description: Returns the details of the all authenticated user profiles.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users profile fetched successfully
+ *       500:
+ *         description: Failed to fetch the user
+ */
+router.route('/').get(protect, isAdmin, viewAllUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/sellers:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get all users profile
+ *     description: Returns the details of the all authenticated user profiles.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users profile fetched successfully
+ *       500:
+ *         description: Failed to fetch the user
+ */
+router.route('/sellers').get(protect, isAdmin, viewAllSellers);
+
+
+/**
+ * @swagger
+ * /api/v1/users/sellers/pending:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get pening seller profile
+ *     description: Returns a list of sellers who have not yet been identity verified
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Pending sellers fetched successfully
+ *       500:
+ *         description: Failed to fetch pending sellers
+ */
+router.route('/sellers/pending').get(protect, isAdmin, pendingSellers);
+
+/**
+ * @swagger
+ * /api/v1/users/status/{id}:
+ *   patch:
+ *     summary: Approve or decline a seller application
+ *     description: Allows an admin to approve or decline a seller.  
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the seller to approve or decline
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approve, decline]
+ *                 description: Status to update the seller with
+ *               reason:
+ *                 type: string
+ *                 description: Reason for declining the seller (required if status is 'decline')
+ *     responses:
+ *       200:
+ *         description: Seller status successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: Successfully updated sellers status
+ *       400:
+ *         description: Bad request due to missing or invalid inputs
+ *       404:
+ *         description: Seller not found
+ *       500:
+ *         description: Server error
+ */
+router.route('/status/:id').patch(protect, isAdmin, approveSeller);
+
+/**
+ * @swagger
+ * /api/v1/users/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Get users profile
+ *     description: Returns the details of the authenticated user either seller or buyer.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user 
+ *         schema:
+ *           type: string
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users profile fetched successfully
+ *       500:
+ *         description: Failed to fetch the user
+ */
+router.route('/:id').get(protect, viewUserProfile);
 
 module.exports =  router;
     
