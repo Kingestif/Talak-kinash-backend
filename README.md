@@ -4,6 +4,28 @@ Welcome to the backend of **Talak Kinash**, a real-time price comparison platfor
 
 ---
 
+## Project Structure
+
+This repo contains **both the currently deployed monolithic app** and an **ongoing migration to a microservices architecture**.
+
+### 🏗 Root Directory (Monolithic App)
+- This is the current working version in production.
+- Connected to our CI/CD pipeline (AWS EC2, GitHub Actions).
+- Fully functional and actively deployed.
+
+### 🧱 Microservices (In Progress)
+Located in the folder /microservices:
+
+- `/auth-service`: Handles authentication and JWT.
+- `/product-service`: Manages product listings and categories.
+- `/payment-service`: Handles payment related logics such as Chapa.
+- `/user-service`: User profiles, preferences, and dashboards.
+
+### ⚠️ Why both?
+We're in the process of refactoring. Due to ongoing competition deadlines, the monolithic version is maintained live, while microservices are being developed for future deployment.
+
+---
+
 ## Features
 
 - **Product Management** – Add, update, and fetch product data
